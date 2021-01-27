@@ -103,6 +103,8 @@ function secure-firewall() {
   # Configure UFW
   if [ -x "$(command -v ufw)" ]; then
     ufw allow 80/tcp
+    ufw default reject incoming
+    ufw default reject outgoing
   fi
   # Secure Nginx
   if [ -x "$(command -v nginx)" ]; then
