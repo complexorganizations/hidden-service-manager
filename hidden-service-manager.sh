@@ -73,8 +73,9 @@ function choose-hidden-service() {
     case $HIDDEN_SERVICE_CHOICE_SETTINGS in
     1)
       if [ -f "$TOR_PATH" ]; then
-        rm -f $TOR_PATH
+        rm -rf $TOR_PATH
       fi
+      mkdir -p $TOR_PATH
       echo "TOR: true" >>$HIDDEN_SERVICE_MANAGER
       ;;
     esac
@@ -86,7 +87,7 @@ choose-hidden-service
 
 # ask the user what to install
 function what-to-install() {
-  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+  if [ -f "$HIDDEN_SERVICE_MANAGER" ]; then
     echo "What would you like to install?"
     echo "  1) Hidden Service (Recommended)"
     echo "  2) Relay"
