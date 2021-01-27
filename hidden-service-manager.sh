@@ -68,35 +68,35 @@ function previous-tor-installation() {
 
 if [ ! -f "$TOR_TORRC" ]; then
 
-function install-tor() {
-  if ! [ -x "$(command -v tor)" ]; then
-    if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
-      apt-get update
-      apt-get install ntpdate tor nyx nginx -y
-    elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
-      yum update
-      yun install ntp tor nyx nginx -y 
-    elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
-      pacman -Syu
-      pacman -Syu --noconfirm tor ntp nginx
-    elif [ "$DISTRO" == "alpine" ]; then
-      apk update
-      apk add tor ntp nginx
+  function install-tor() {
+    if ! [ -x "$(command -v tor)" ]; then
+      if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
+        apt-get update
+        apt-get install ntpdate tor nyx nginx -y
+      elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+        yum update
+        yun install ntp tor nyx nginx -y
+      elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+        pacman -Syu
+        pacman -Syu --noconfirm tor ntp nginx
+      elif [ "$DISTRO" == "alpine" ]; then
+        apk update
+        apk add tor ntp nginx
+      fi
     fi
-  fi
-}
+  }
 
-install-tor
+  install-tor
 
-function configure-tor() {
-  if pgrep systemd-journal; then
-    systemctl enable tor
-    systemctl restart tor
-  else
-    service tor enable
-    service tor restart
-  fi
-}
+  function configure-tor() {
+    if pgrep systemd-journal; then
+      systemctl enable tor
+      systemctl restart tor
+    else
+      service tor enable
+      service tor restart
+    fi
+  }
 
 else
 
