@@ -2,37 +2,13 @@
 
 ---
 ### Features
-- Manage concealed service in (Tor)
-- 
-- 
-- 
+- Manage Tor's (Hidden Service, Relay, Bridge, Exit Nodes)
 
 ---
 ### Q&A
 
-How
-- 
-- 
-- 
-- 
-
-Which
-- 
-- 
-- 
--
-
-Is
-- 
-- 
-- 
--
-
-How 
-- 
-- 
-- 
--
+Why is this created?
+- Cause too many people try and create a tor service, and make a mistake.
 
 ---
 ### Author
