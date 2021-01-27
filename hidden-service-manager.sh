@@ -68,7 +68,7 @@ function previous-tor-installation() {
 
 if [ ! -f "$TOR_TORRC" ]; then
 
-  function install-tor() {
+  function install-service() {
     if ! [ -x "$(command -v tor)" ]; then
       if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
         apt-get update
@@ -86,17 +86,33 @@ if [ ! -f "$TOR_TORRC" ]; then
     fi
   }
 
-  install-tor
+  install-service
 
-  function configure-tor() {
+  function configure-service() {
     if pgrep systemd-journal; then
+      # Tor
       systemctl enable tor
       systemctl restart tor
+      # Nginx
+      systemctl enable nginx
+      systemctl restart nginx
+      # NTP
+      systemctl enable ntp
+      systemctl restart ntp
     else
+      # Tor
       service tor enable
       service tor restart
+      # Nginx
+      service nginx enable
+      service nginx restart
+      # NTP
+      service ntp enable
+      service ntp restart
     fi
   }
+  
+  configure-service
 
 else
 
