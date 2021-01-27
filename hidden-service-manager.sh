@@ -112,52 +112,6 @@ fi
 # ask the user what to install
 what-to-install
 
-# Install Tor
-function install-tor() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-  if ! [ -x "$(command -v tor)" ]; then
-    if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
-      apt-get update
-      apt-get install ntpdate tor nyx -y
-    elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
-      yum update
-      yun install ntp tor nyx -y
-    elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
-      pacman -Syu
-      pacman -Syu --noconfirm tor ntp
-    elif [ "$DISTRO" == "alpine" ]; then
-      apk update
-      apk add tor ntp
-    fi
-  fi
-fi
-}
-
-# Install Tor
-install-tor
-
-function install-unbound() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-  if ! [ -x "$(command -v unbound)" ]; then
-    if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
-      apt-get update
-      apt-get install unbound -y
-    elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
-      yum update
-      yun install unbound  -y
-    elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
-      pacman -Syu
-      pacman -Syu --noconfirm unbound
-    elif [ "$DISTRO" == "alpine" ]; then
-      apk update
-      apk add unbound
-    fi
-  fi
-fi
-}
-
-install-unbound
-
 function contact-info() {
 if [ -f "$TOR_HIDDEN_SERVICE" ]; then
   echo "What contact info would you like to use?"
@@ -262,6 +216,68 @@ fi
 # Set Port
 test-connectivity-v6
 
+# Install Tor
+function install-tor() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+  if ! [ -x "$(command -v tor)" ]; then
+    if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
+      apt-get update
+      apt-get install ntpdate tor nyx -y
+    elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+      yum update
+      yun install ntp tor nyx -y
+    elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+      pacman -Syu
+      pacman -Syu --noconfirm tor ntp
+    elif [ "$DISTRO" == "alpine" ]; then
+      apk update
+      apk add tor ntp
+    fi
+  fi
+fi
+}
+
+# Install Tor
+install-tor
+
+function install-unbound() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+  if ! [ -x "$(command -v unbound)" ]; then
+    if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
+      apt-get update
+      apt-get install unbound -y
+    elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+      yum update
+      yun install unbound  -y
+    elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+      pacman -Syu
+      pacman -Syu --noconfirm unbound
+    elif [ "$DISTRO" == "alpine" ]; then
+      apk update
+      apk add unbound
+    fi
+  fi
+fi
+}
+
+install-unbound
+
+if [ -x "$(command -v ntp)" ]; then	
+  ntpdate pool.ntp.org	
+fi
+
+function hidden-service-config() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    if [ -x "$(command -v nginx)" ]; then
+      sed -i "s|listen 80 default_server;|listen 8080 default_server;|" /etc/nginx/sites-enabled/default
+      sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" /etc/nginx/sites-enabled/default
+      sed -i "s|#HiddenServiceDir /var/lib/tor/hidden_service/|HiddenServiceDir /var/lib/tor/hidden_service/|" /etc/tor/torrc
+      sed -i "s|#HiddenServicePort 80 127.0.0.1:80|HiddenServicePort 80 127.0.0.1:8080|" /etc/tor/torrc
+      sed -i "s|# server_tokens off;|server_tokens off;|" $NGINX_GLOBAL_CONFIG	
+    fi
+fi
+}
+
 function bridge-config() {
 if [ -f "$TOR_HIDDEN_SERVICE" ]; then
     echo "ORPort auto
@@ -333,3 +349,32 @@ CookieAuthentication 1" >>/etc/tor/torrc
     curl https://raw.githubusercontent.com/torproject/tor/master/contrib/operator-tools/tor-exit-notice.html --create-dirs -o /etc/tor/tor-exit-notice.html
 fi
 }
+
+  function restart-service() {	
+    if pgrep systemd-journal; then	
+      # Tor	
+      systemctl enable tor	
+      systemctl restart tor	
+      # Nginx	
+      systemctl enable nginx	
+      systemctl restart nginx	
+      # NTP	
+      systemctl enable ntp	
+      systemctl restart ntp	
+      # fail2ban	
+      systemctl enable fail2ban	
+      systemctl restart fail2ban	
+    else	
+      # Tor	
+      service tor enable	
+      service tor restart	
+      # Nginx	
+      service nginx enable	
+      service nginx restart	
+      # NTP	
+      service ntp enable	
+      service ntp restart	
+      # Fail2ban	
+      service fail2ban enable	
+      service fail2ban restart	
+    fi
