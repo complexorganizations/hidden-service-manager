@@ -52,9 +52,33 @@ installing-system-requirements
 TOR_PATH="/etc/tor"
 TOR_TORRC="$TOR_PATH/torrc"
 HIDDEN_SERVICE_MANAGER="$TOR_PATH/hidden-service-manager"
+TOR_HIDDEN_SERVICE="$TOR_PATH/hidden-service-manager"
 HIDDEN_SERVICE_MANAGER_UPDATE="https://raw.githubusercontent.com/complexorganizations/hidden-service-manager/main/hidden-service-manager.sh"
 NGINX_GLOBAL_CONFIG="/etc/nginx/nginx.conf"
 FAIL_TO_BAN_CONFIG="/etc/fail2ban/jail.conf"
+
+# ask the user what to install
+function choose-hidden-service() {
+  if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
+  echo "What would you like to install?"
+  echo "  1) TOR (Recommended)"
+  until [[ "$HIDDEN_SERVICE_CHOICE_SETTINGS" =~ ^[1-1]$ ]]; do
+    read -rp "Installer Choice [1-4]: " -e -i 1 HIDDEN_SERVICE_CHOICE_SETTINGS
+  done
+  # Apply port response
+  case $HIDDEN_SERVICE_CHOICE_SETTINGS in
+  1)
+    if [ -f "$TOR_PATH" ]; then
+      rm -f $TOR_PATH
+    fi
+    echo "TOR: true" >>$TOR_HIDDEN_SERVICE
+    ;;
+  esac
+  fi
+}
+
+# ask the user what to install
+choose-hidden-service
 
 # ask the user what to install
 function what-to-install() {
