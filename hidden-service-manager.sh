@@ -72,19 +72,15 @@ function install-tor() {
   if ! [ -x "$(command -v tor)" ]; then
     if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
       apt-get update
-      apt install apt-transport-https -y
-      echo "deb https://deb.torproject.org/torproject.org stretch main" >>/etc/apt/sources.list
-      echo "deb-src https://deb.torproject.org/torproject.org stretch main" >>/etc/apt/sources.list
-      curl https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --import
-      gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | apt-key add -
-      apt-get update
-      apt-get install ntpdate tor nyx deb.torproject.org-keyring -y
+      apt-get install ntpdate tor nyx nginx -y
     elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
       yum update
+      yun install ntp tor nyx nginx -y 
     elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
-      pacman -s
+      pacman -Syu --noconfirm tor ntp nginx
     elif [ "$DISTRO" == "alpine" ]; then
       apk update
+      apk add tor ntp nginx
     fi
   fi
 }
