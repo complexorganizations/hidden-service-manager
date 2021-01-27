@@ -71,7 +71,7 @@ function choose-hidden-service() {
     # Apply port response
     case $HIDDEN_SERVICE_CHOICE_SETTINGS in
     1)
-      if [ -f "$TOR_PATH" ]; then
+      if [ -d "$TOR_PATH" ]; then
         rm -rf $TOR_PATH
       fi
       mkdir -p $TOR_PATH
