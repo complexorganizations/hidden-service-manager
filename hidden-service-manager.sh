@@ -60,20 +60,20 @@ FAIL_TO_BAN_CONFIG="/etc/fail2ban/jail.conf"
 # ask the user what to install
 function choose-hidden-service() {
   if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
-  echo "What would you like to install?"
-  echo "  1) TOR (Recommended)"
-  until [[ "$HIDDEN_SERVICE_CHOICE_SETTINGS" =~ ^[1-1]$ ]]; do
-    read -rp "Installer Choice [1-4]: " -e -i 1 HIDDEN_SERVICE_CHOICE_SETTINGS
-  done
-  # Apply port response
-  case $HIDDEN_SERVICE_CHOICE_SETTINGS in
-  1)
-    if [ -f "$TOR_PATH" ]; then
-      rm -f $TOR_PATH
-    fi
-    echo "TOR: true" >>$TOR_HIDDEN_SERVICE
-    ;;
-  esac
+    echo "What would you like to install?"
+    echo "  1) TOR (Recommended)"
+    until [[ "$HIDDEN_SERVICE_CHOICE_SETTINGS" =~ ^[1-1]$ ]]; do
+      read -rp "Installer Choice [1-4]: " -e -i 1 HIDDEN_SERVICE_CHOICE_SETTINGS
+    done
+    # Apply port response
+    case $HIDDEN_SERVICE_CHOICE_SETTINGS in
+    1)
+      if [ -f "$TOR_PATH" ]; then
+        rm -f $TOR_PATH
+      fi
+      echo "TOR: true" >>$TOR_HIDDEN_SERVICE
+      ;;
+    esac
   fi
 }
 
@@ -82,81 +82,81 @@ choose-hidden-service
 
 # ask the user what to install
 function what-to-install() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-  echo "What would you like to install?"
-  echo "  1) Hidden Service (Recommended)"
-  echo "  2) Relay"
-  echo "  3) Bridge"
-  echo "  4) Exit Node (Advanced)"
-  until [[ "$INSTALLER_COICE_SETTINGS" =~ ^[1-4]$ ]]; do
-    read -rp "Installer Choice [1-4]: " -e -i 1 INSTALLER_COICE_SETTINGS
-  done
-  # Apply port response
-  case $INSTALLER_COICE_SETTINGS in
-  1)
-    echo "1"
-    ;;
-  2)
-    echo "2"
-    ;;
-  3)
-    echo "3"
-    ;;
-  4)
-    echo "4"
-    ;;
-  esac
-fi
+  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    echo "What would you like to install?"
+    echo "  1) Hidden Service (Recommended)"
+    echo "  2) Relay"
+    echo "  3) Bridge"
+    echo "  4) Exit Node (Advanced)"
+    until [[ "$INSTALLER_COICE_SETTINGS" =~ ^[1-4]$ ]]; do
+      read -rp "Installer Choice [1-4]: " -e -i 1 INSTALLER_COICE_SETTINGS
+    done
+    # Apply port response
+    case $INSTALLER_COICE_SETTINGS in
+    1)
+      echo "1"
+      ;;
+    2)
+      echo "2"
+      ;;
+    3)
+      echo "3"
+      ;;
+    4)
+      echo "4"
+      ;;
+    esac
+  fi
 }
 
 # ask the user what to install
 what-to-install
 
 function contact-info() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-  echo "What contact info would you like to use?"
-  echo "  1) John Doe (Recommended)"
-  echo "  2) Custom (Advanced)"
-  until [[ "$CONTACT_INFO_SETTINGS" =~ ^[1-3]$ ]]; do
-    read -rp "Contact Info [1-3]: " -e -i 1 CONTACT_INFO_SETTINGS
-  done
-  case $CONTACT_INFO_SETTINGS in
-  1)
-    CONTACT_INFO_NAME="John Doe"
-    CONTACT_INFO_EMAIL="johndoe@example.com"
-    ;;
-  2)
-    read -rp "Custom Name: " -e -i "John Doe" CONTACT_INFO_NAME
-    read -rp "Custom Email: " -e -i "johndoe@example.com" CONTACT_INFO_EMAIL
-    ;;
-  esac
-fi
+  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    echo "What contact info would you like to use?"
+    echo "  1) John Doe (Recommended)"
+    echo "  2) Custom (Advanced)"
+    until [[ "$CONTACT_INFO_SETTINGS" =~ ^[1-3]$ ]]; do
+      read -rp "Contact Info [1-3]: " -e -i 1 CONTACT_INFO_SETTINGS
+    done
+    case $CONTACT_INFO_SETTINGS in
+    1)
+      CONTACT_INFO_NAME="John Doe"
+      CONTACT_INFO_EMAIL="johndoe@example.com"
+      ;;
+    2)
+      read -rp "Custom Name: " -e -i "John Doe" CONTACT_INFO_NAME
+      read -rp "Custom Email: " -e -i "johndoe@example.com" CONTACT_INFO_EMAIL
+      ;;
+    esac
+  fi
 }
 
 contact-info
 
 # Question 1: Determine host port
 function set-port() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-  echo "Do u want to use the recommened ports?"
-  echo "   1) Yes (Recommended)"
-  echo "   2) Custom (Advanced)"
-  until [[ "$PORT_CHOICE_SETTINGS" =~ ^[1-2]$ ]]; do
-    read -rp "Port choice [1-2]: " -e -i 1 PORT_CHOICE_SETTINGS
-  done
-  case $PORT_CHOICE_SETTINGS in
-  1)
-    OR_SERVER_PORT="9001"
-    DIR_SERVER_PORT="9030"
-    CON_SERVER_PORT="9051"
-    ;;
-  2)
-    read -rp "Custom OR Port" -e -i "9001" OR_SERVER_PORT
-    read -rp "Custom DIR Port" -e -i "9030" DIR_SERVER_PORT
-    read -rp "Custom CON Port" -e -i "9051" CON_SERVER_PORT
-    ;;
-  esac
-fi
+  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    echo "Do u want to use the recommened ports?"
+    echo "   1) Yes (Recommended)"
+    echo "   2) Custom (Advanced)"
+    until [[ "$PORT_CHOICE_SETTINGS" =~ ^[1-2]$ ]]; do
+      read -rp "Port choice [1-2]: " -e -i 1 PORT_CHOICE_SETTINGS
+    done
+    case $PORT_CHOICE_SETTINGS in
+    1)
+      OR_SERVER_PORT="9001"
+      DIR_SERVER_PORT="9030"
+      CON_SERVER_PORT="9051"
+      ;;
+    2)
+      read -rp "Custom OR Port" -e -i "9001" OR_SERVER_PORT
+      read -rp "Custom DIR Port" -e -i "9030" DIR_SERVER_PORT
+      read -rp "Custom CON Port" -e -i "9051" CON_SERVER_PORT
+      ;;
+    esac
+  fi
 }
 
 # Set the port number
@@ -164,26 +164,26 @@ set-port
 
 # Determine host port
 function test-connectivity-v4() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-  echo "How would you like to detect IPV4?"
-  echo "  1) Curl (Recommended)"
-  echo "  2) IP (Advanced)"
-  echo "  3) Custom (Advanced)"
-  until [[ "$SERVER_HOST_V4_SETTINGS" =~ ^[1-3]$ ]]; do
-    read -rp "ipv4 choice [1-3]: " -e -i 1 SERVER_HOST_V4_SETTINGS
-  done
-  case $SERVER_HOST_V4_SETTINGS in
-  1)
-    SERVER_HOST_V4="$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
-    ;;
-  2)
-    SERVER_HOST_V4=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
-    ;;
-  3)
-    read -rp "Custom IPV4: " -e -i "$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')" SERVER_HOST_V4
-    ;;
-  esac
-fi
+  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    echo "How would you like to detect IPV4?"
+    echo "  1) Curl (Recommended)"
+    echo "  2) IP (Advanced)"
+    echo "  3) Custom (Advanced)"
+    until [[ "$SERVER_HOST_V4_SETTINGS" =~ ^[1-3]$ ]]; do
+      read -rp "ipv4 choice [1-3]: " -e -i 1 SERVER_HOST_V4_SETTINGS
+    done
+    case $SERVER_HOST_V4_SETTINGS in
+    1)
+      SERVER_HOST_V4="$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+      ;;
+    2)
+      SERVER_HOST_V4=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
+      ;;
+    3)
+      read -rp "Custom IPV4: " -e -i "$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')" SERVER_HOST_V4
+      ;;
+    esac
+  fi
 }
 
 # Set Port
@@ -191,26 +191,26 @@ test-connectivity-v4
 
 # Determine ipv6
 function test-connectivity-v6() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-  echo "How would you like to detect IPV6?"
-  echo "  1) Curl (Recommended)"
-  echo "  2) IP (Advanced)"
-  echo "  3) Custom (Advanced)"
-  until [[ "$SERVER_HOST_V6_SETTINGS" =~ ^[1-3]$ ]]; do
-    read -rp "ipv6 choice [1-3]: " -e -i 1 SERVER_HOST_V6_SETTINGS
-  done
-  case $SERVER_HOST_V6_SETTINGS in
-  1)
-    SERVER_HOST_V6="$(curl -6 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
-    ;;
-  2)
-    SERVER_HOST_V6=$(ip r get to 2001:4860:4860::8888 | perl -ne '/src ([\w:]+)/ && print "$1\n"')
-    ;;
-  3)
-    read -rp "Custom IPV6: " -e -i "$(curl -6 -s 'https://api.ipengine.dev' | jq -r '.network.ip')" SERVER_HOST_V6
-    ;;
-  esac
-fi
+  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    echo "How would you like to detect IPV6?"
+    echo "  1) Curl (Recommended)"
+    echo "  2) IP (Advanced)"
+    echo "  3) Custom (Advanced)"
+    until [[ "$SERVER_HOST_V6_SETTINGS" =~ ^[1-3]$ ]]; do
+      read -rp "ipv6 choice [1-3]: " -e -i 1 SERVER_HOST_V6_SETTINGS
+    done
+    case $SERVER_HOST_V6_SETTINGS in
+    1)
+      SERVER_HOST_V6="$(curl -6 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+      ;;
+    2)
+      SERVER_HOST_V6=$(ip r get to 2001:4860:4860::8888 | perl -ne '/src ([\w:]+)/ && print "$1\n"')
+      ;;
+    3)
+      read -rp "Custom IPV6: " -e -i "$(curl -6 -s 'https://api.ipengine.dev' | jq -r '.network.ip')" SERVER_HOST_V6
+      ;;
+    esac
+  fi
 }
 
 # Set Port
@@ -218,68 +218,68 @@ test-connectivity-v6
 
 # Install Tor
 function install-tor() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-  if ! [ -x "$(command -v tor)" ]; then
-    if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
-      apt-get update
-      apt-get install ntpdate tor nyx -y
-    elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
-      yum update
-      yun install ntp tor nyx -y
-    elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
-      pacman -Syu
-      pacman -Syu --noconfirm tor ntp
-    elif [ "$DISTRO" == "alpine" ]; then
-      apk update
-      apk add tor ntp
+  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    if ! [ -x "$(command -v tor)" ]; then
+      if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
+        apt-get update
+        apt-get install ntpdate tor nyx -y
+      elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+        yum update
+        yun install ntp tor nyx -y
+      elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+        pacman -Syu
+        pacman -Syu --noconfirm tor ntp
+      elif [ "$DISTRO" == "alpine" ]; then
+        apk update
+        apk add tor ntp
+      fi
     fi
   fi
-fi
 }
 
 # Install Tor
 install-tor
 
 function install-unbound() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-  if ! [ -x "$(command -v unbound)" ]; then
-    if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
-      apt-get update
-      apt-get install unbound -y
-    elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
-      yum update
-      yun install unbound  -y
-    elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
-      pacman -Syu
-      pacman -Syu --noconfirm unbound
-    elif [ "$DISTRO" == "alpine" ]; then
-      apk update
-      apk add unbound
+  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    if ! [ -x "$(command -v unbound)" ]; then
+      if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
+        apt-get update
+        apt-get install unbound -y
+      elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+        yum update
+        yun install unbound -y
+      elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+        pacman -Syu
+        pacman -Syu --noconfirm unbound
+      elif [ "$DISTRO" == "alpine" ]; then
+        apk update
+        apk add unbound
+      fi
     fi
   fi
-fi
 }
 
 install-unbound
 
-if [ -x "$(command -v ntp)" ]; then	
-  ntpdate pool.ntp.org	
+if [ -x "$(command -v ntp)" ]; then
+  ntpdate pool.ntp.org
 fi
 
 function hidden-service-config() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
     if [ -x "$(command -v nginx)" ]; then
       sed -i "s|listen 80 default_server;|listen 8080 default_server;|" /etc/nginx/sites-enabled/default
       sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" /etc/nginx/sites-enabled/default
       sed -i "s|#HiddenServiceDir /var/lib/tor/hidden_service/|HiddenServiceDir /var/lib/tor/hidden_service/|" /etc/tor/torrc
       sed -i "s|#HiddenServicePort 80 127.0.0.1:80|HiddenServicePort 80 127.0.0.1:8080|" /etc/tor/torrc
-      sed -i "s|# server_tokens off;|server_tokens off;|" $NGINX_GLOBAL_CONFIG	
+      sed -i "s|# server_tokens off;|server_tokens off;|" $NGINX_GLOBAL_CONFIG
     fi
-fi
+  fi
 }
 
 function bridge-config() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
     echo "ORPort auto
 ORPort [$SERVER_HOST_V6]:auto
 SocksPort 0
@@ -293,11 +293,11 @@ ExitPolicy reject6 *:*, reject *:*
 DisableDebuggerAttachment 0
 ControlPort $CON_SERVER_PORT
 CookieAuthentication 1" >>/etc/tor/torrc
-fi
+  fi
 }
 
 function relay-config() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
     chattr -i /etc/resolv.conf
     sed -i "s|nameserver|#nameserver|" /etc/resolv.conf
     sed -i "s|search|#search|" /etc/resolv.conf
@@ -328,7 +328,7 @@ CookieAuthentication 1" >>/etc/tor/torrc
 }
 
 function exit-config() {
-if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
     echo "SocksPort 0
 RunAsDaemon 1
 ORPort $OR_SERVER_PORT
@@ -347,34 +347,35 @@ DisableDebuggerAttachment 0
 ControlPort 9051
 CookieAuthentication 1" >>/etc/tor/torrc
     curl https://raw.githubusercontent.com/torproject/tor/master/contrib/operator-tools/tor-exit-notice.html --create-dirs -o /etc/tor/tor-exit-notice.html
-fi
+  fi
 }
 
-  function restart-service() {	
-    if pgrep systemd-journal; then	
-      # Tor	
-      systemctl enable tor	
-      systemctl restart tor	
-      # Nginx	
-      systemctl enable nginx	
-      systemctl restart nginx	
-      # NTP	
-      systemctl enable ntp	
-      systemctl restart ntp	
-      # fail2ban	
-      systemctl enable fail2ban	
-      systemctl restart fail2ban	
-    else	
-      # Tor	
-      service tor enable	
-      service tor restart	
-      # Nginx	
-      service nginx enable	
-      service nginx restart	
-      # NTP	
-      service ntp enable	
-      service ntp restart	
-      # Fail2ban	
-      service fail2ban enable	
-      service fail2ban restart	
-    fi
+function restart-service() {
+  if pgrep systemd-journal; then
+    # Tor
+    systemctl enable tor
+    systemctl restart tor
+    # Nginx
+    systemctl enable nginx
+    systemctl restart nginx
+    # NTP
+    systemctl enable ntp
+    systemctl restart ntp
+    # fail2ban
+    systemctl enable fail2ban
+    systemctl restart fail2ban
+  else
+    # Tor
+    service tor enable
+    service tor restart
+    # Nginx
+    service nginx enable
+    service nginx restart
+    # NTP
+    service ntp enable
+    service ntp restart
+    # Fail2ban
+    service fail2ban enable
+    service fail2ban restart
+  fi
+}
