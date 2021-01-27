@@ -111,7 +111,8 @@ function secure-firewall() {
   fi
   # Fail2ban
   if [ ! -f "/etc/fail2ban/jail.conf" ]; then
-    sed -i "s|bantime = 600;|bantime = 1800;|" /etc/nginx/nginx.conf
+    sed -i "s|# bantime = 1h|bantime = 720h|" /etc/fail2ban/jail.conf
+    sed -i "s|# enabled = true|enabled = true|" /etc/fail2ban/jail.conf
   fi
 }
 
