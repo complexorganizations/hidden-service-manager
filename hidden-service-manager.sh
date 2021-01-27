@@ -82,6 +82,7 @@ choose-hidden-service
 
 # ask the user what to install
 function what-to-install() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
   echo "What would you like to install?"
   echo "  1) Hidden Service (Recommended)"
   echo "  2) Relay"
@@ -92,19 +93,20 @@ function what-to-install() {
   done
   # Apply port response
   case $INSTALLER_COICE_SETTINGS in
-  21)
-    INSTALLER_COICE="y INSTALL_HIDDEN_SERVICE"
+  1)
+    echo "1"
     ;;
   2)
-    INSTALLER_COICE="y INSTALL_RELAY"
+    echo "2"
     ;;
   3)
-    INSTALLER_COICE="y INSTALL_BRIDGE"
+    echo "3"
     ;;
   4)
-    INSTALLER_COICE="y INSTALL_EXIT_NODE"
+    echo "4"
     ;;
   esac
+fi
 }
 
 # ask the user what to install
@@ -112,6 +114,7 @@ what-to-install
 
 # Install Tor
 function install-tor() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
   if ! [ -x "$(command -v tor)" ]; then
     if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
       apt-get update
@@ -127,12 +130,14 @@ function install-tor() {
       apk add tor ntp
     fi
   fi
+fi
 }
 
 # Install Tor
 install-tor
 
 function install-unbound() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
   if ! [ -x "$(command -v unbound)" ]; then
     if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
       apt-get update
@@ -148,18 +153,19 @@ function install-unbound() {
       apk add unbound
     fi
   fi
+fi
 }
 
 install-unbound
 
 function contact-info() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
   echo "What contact info would you like to use?"
   echo "  1) John Doe (Recommended)"
   echo "  2) Custom (Advanced)"
   until [[ "$CONTACT_INFO_SETTINGS" =~ ^[1-3]$ ]]; do
-    read -rp "ipv4 choice [1-3]: " -e -i 1 CONTACT_INFO_SETTINGS
+    read -rp "Contact Info [1-3]: " -e -i 1 CONTACT_INFO_SETTINGS
   done
-  # Apply port response
   case $CONTACT_INFO_SETTINGS in
   1)
     CONTACT_INFO_NAME="John Doe"
@@ -170,19 +176,20 @@ function contact-info() {
     read -rp "Custom Email: " -e -i "johndoe@example.com" CONTACT_INFO_EMAIL
     ;;
   esac
+fi
 }
 
 contact-info
 
 # Question 1: Determine host port
 function set-port() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
   echo "Do u want to use the recommened ports?"
   echo "   1) Yes (Recommended)"
   echo "   2) Custom (Advanced)"
   until [[ "$PORT_CHOICE_SETTINGS" =~ ^[1-2]$ ]]; do
     read -rp "Port choice [1-2]: " -e -i 1 PORT_CHOICE_SETTINGS
   done
-  # Apply port response
   case $PORT_CHOICE_SETTINGS in
   1)
     OR_SERVER_PORT="9001"
@@ -195,6 +202,7 @@ function set-port() {
     read -rp "Custom CON Port" -e -i "9051" CON_SERVER_PORT
     ;;
   esac
+fi
 }
 
 # Set the port number
@@ -202,6 +210,7 @@ set-port
 
 # Determine host port
 function test-connectivity-v4() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
   echo "How would you like to detect IPV4?"
   echo "  1) Curl (Recommended)"
   echo "  2) IP (Advanced)"
@@ -209,7 +218,6 @@ function test-connectivity-v4() {
   until [[ "$SERVER_HOST_V4_SETTINGS" =~ ^[1-3]$ ]]; do
     read -rp "ipv4 choice [1-3]: " -e -i 1 SERVER_HOST_V4_SETTINGS
   done
-  # Apply port response
   case $SERVER_HOST_V4_SETTINGS in
   1)
     SERVER_HOST_V4="$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
@@ -221,6 +229,7 @@ function test-connectivity-v4() {
     read -rp "Custom IPV4: " -e -i "$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')" SERVER_HOST_V4
     ;;
   esac
+fi
 }
 
 # Set Port
@@ -228,6 +237,7 @@ test-connectivity-v4
 
 # Determine ipv6
 function test-connectivity-v6() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
   echo "How would you like to detect IPV6?"
   echo "  1) Curl (Recommended)"
   echo "  2) IP (Advanced)"
@@ -235,7 +245,6 @@ function test-connectivity-v6() {
   until [[ "$SERVER_HOST_V6_SETTINGS" =~ ^[1-3]$ ]]; do
     read -rp "ipv6 choice [1-3]: " -e -i 1 SERVER_HOST_V6_SETTINGS
   done
-  # Apply port response
   case $SERVER_HOST_V6_SETTINGS in
   1)
     SERVER_HOST_V6="$(curl -6 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
@@ -247,6 +256,7 @@ function test-connectivity-v6() {
     read -rp "Custom IPV6: " -e -i "$(curl -6 -s 'https://api.ipengine.dev' | jq -r '.network.ip')" SERVER_HOST_V6
     ;;
   esac
+fi
 }
 
 # Set Port
