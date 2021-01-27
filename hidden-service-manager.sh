@@ -92,7 +92,6 @@ function install-tor() {
 install-tor
 
 function configure-tor() {
-  # restart tor
   if pgrep systemd-journal; then
     systemctl enable tor
     systemctl restart tor
