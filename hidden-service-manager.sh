@@ -261,3 +261,75 @@ fi
 
 # Set Port
 test-connectivity-v6
+
+function bridge-config() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    echo "ORPort auto
+ORPort [$SERVER_HOST_V6]:auto
+SocksPort 0
+BridgeRelay 1
+ServerTransportPlugin obfs4 exec /usr/bin/obfs4proxy
+ServerTransportListenAddr obfs4 0.0.0.0:8042
+ServerTransportListenAddr obfs4 [::]:8042
+ExtOrPort auto
+Log notice file /var/log/tor/notices.log
+ExitPolicy reject6 *:*, reject *:*
+DisableDebuggerAttachment 0
+ControlPort $CON_SERVER_PORT
+CookieAuthentication 1" >>/etc/tor/torrc
+fi
+}
+
+function relay-config() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    chattr -i /etc/resolv.conf
+    sed -i "s|nameserver|#nameserver|" /etc/resolv.conf
+    sed -i "s|search|#search|" /etc/resolv.conf
+    echo "nameserver 127.0.0.1" >>/etc/resolv.conf
+    chattr +i /etc/resolv.conf
+    # torrc file
+    echo "SocksPort 0
+RunAsDaemon 1
+ORPort $OR_SERVER_PORT
+ORPort [$SERVER_HOST_V6]:$OR_SERVER_PORT
+Nickname $CONTACT_INFO_NAME
+ContactInfo $CONTACT_INFO_EMAIL
+Log notice file /var/log/tor/notices.log
+DirPort $DIR_SERVER_PORT
+ExitPolicy reject6 *:*, reject *:*
+DisableDebuggerAttachment 0
+ControlPort $CON_SERVER_PORT
+CookieAuthentication 1" >>/etc/tor/torrc
+    # enable and restart service
+    if pgrep systemd-journal; then
+      systemctl enable unbound
+      systemctl restart unbound
+    else
+      service unbound enable
+      service unbound restart
+    fi
+  fi
+}
+
+function exit-config() {
+if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    echo "SocksPort 0
+RunAsDaemon 1
+ORPort $OR_SERVER_PORT
+ORPort [$SERVER_HOST_V6]:9001
+Nickname tt
+ContactInfo $CONTACT_INFO_EMAIL
+Log notice file /var/log/tor/notices.log
+DirPort 80
+DirPortFrontPage /etc/tor/tor-exit-notice.html
+ExitPolicy accept *:53        # DNS
+ExitPolicy accept *:80        # HTTP
+ExitPolicy accept *:443       # HTTPS
+ExitPolicy reject *:*
+IPv6Exit 1
+DisableDebuggerAttachment 0
+ControlPort 9051
+CookieAuthentication 1" >>/etc/tor/torrc
+    curl https://raw.githubusercontent.com/torproject/tor/master/contrib/operator-tools/tor-exit-notice.html --create-dirs -o /etc/tor/tor-exit-notice.html
+fi
+}
