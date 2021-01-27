@@ -52,10 +52,14 @@ installing-system-requirements
 TOR_PATH="/etc/tor"
 TOR_TORRC="$TOR_PATH/torrc"
 HIDDEN_SERVICE_MANAGER="$TOR_PATH/hidden-service-manager"
-TOR_HIDDEN_SERVICE="$TOR_PATH/hidden-service-manager"
-HIDDEN_SERVICE_MANAGER_UPDATE="https://raw.githubusercontent.com/complexorganizations/hidden-service-manager/main/hidden-service-manager.sh"
+TOR_HIDDEN_SERVICE="$TOR_PATH/hidden-service"
+TOR_RELAY_SERVICE="$TOR_PATH/relay-service"
+TOR_BRIDGE_SERVICE="$TOR_PATH/bridge-service"
+TOR_EXIT_SERVICE="$TOR_PATH/exit-service"
 NGINX_GLOBAL_CONFIG="/etc/nginx/nginx.conf"
+NGINX_LOCAL_CONFIG="/etc/nginx/sites-enabled/default"
 FAIL_TO_BAN_CONFIG="/etc/fail2ban/jail.conf"
+HIDDEN_SERVICE_MANAGER_UPDATE="https://raw.githubusercontent.com/complexorganizations/hidden-service-manager/main/hidden-service-manager.sh"
 
 # ask the user what to install
 function choose-hidden-service() {
@@ -71,7 +75,7 @@ function choose-hidden-service() {
       if [ -f "$TOR_PATH" ]; then
         rm -f $TOR_PATH
       fi
-      echo "TOR: true" >>$TOR_HIDDEN_SERVICE
+      echo "TOR: true" >>$HIDDEN_SERVICE_MANAGER
       ;;
     esac
   fi
@@ -94,16 +98,16 @@ function what-to-install() {
     # Apply port response
     case $INSTALLER_COICE_SETTINGS in
     1)
-      echo "1"
+      echo "Hidden: true" >>$TOR_HIDDEN_SERVICE
       ;;
     2)
-      echo "2"
+      echo "Relay: true" >>$TOR_RELAY_SERVICE
       ;;
     3)
-      echo "3"
+      echo "Bridge: true" >>$TOR_BRIDGE_SERVICE
       ;;
     4)
-      echo "4"
+      echo "Exit: true" >>$TOR_EXIT_SERVICE
       ;;
     esac
   fi
@@ -269,11 +273,13 @@ fi
 function hidden-service-config() {
   if [ -f "$TOR_HIDDEN_SERVICE" ]; then
     if [ -x "$(command -v nginx)" ]; then
-      sed -i "s|listen 80 default_server;|listen 8080 default_server;|" /etc/nginx/sites-enabled/default
-      sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" /etc/nginx/sites-enabled/default
-      sed -i "s|#HiddenServiceDir /var/lib/tor/hidden_service/|HiddenServiceDir /var/lib/tor/hidden_service/|" /etc/tor/torrc
-      sed -i "s|#HiddenServicePort 80 127.0.0.1:80|HiddenServicePort 80 127.0.0.1:8080|" /etc/tor/torrc
+      sed -i "s|listen 80 default_server;|listen 8080 default_server;|" $NGINX_LOCAL_CONFIG
+      sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" $NGINX_LOCAL_CONFIG
       sed -i "s|# server_tokens off;|server_tokens off;|" $NGINX_GLOBAL_CONFIG
+    fi
+    if [ -x "$(command -v tor)" ]; then
+      sed -i "s|#HiddenServiceDir /var/lib/tor/hidden_service/|HiddenServiceDir /var/lib/tor/hidden_service/|" $TOR_TORRC
+      sed -i "s|#HiddenServicePort 80 127.0.0.1:80|HiddenServicePort 80 127.0.0.1:8080|" $TOR_TORRC
     fi
   fi
 }
@@ -292,7 +298,7 @@ Log notice file /var/log/tor/notices.log
 ExitPolicy reject6 *:*, reject *:*
 DisableDebuggerAttachment 0
 ControlPort $CON_SERVER_PORT
-CookieAuthentication 1" >>/etc/tor/torrc
+CookieAuthentication 1" >>$TOR_TORRC
   fi
 }
 
@@ -315,7 +321,7 @@ DirPort $DIR_SERVER_PORT
 ExitPolicy reject6 *:*, reject *:*
 DisableDebuggerAttachment 0
 ControlPort $CON_SERVER_PORT
-CookieAuthentication 1" >>/etc/tor/torrc
+CookieAuthentication 1" >>$TOR_TORRC
     # enable and restart service
     if pgrep systemd-journal; then
       systemctl enable unbound
@@ -345,7 +351,7 @@ ExitPolicy reject *:*
 IPv6Exit 1
 DisableDebuggerAttachment 0
 ControlPort 9051
-CookieAuthentication 1" >>/etc/tor/torrc
+CookieAuthentication 1" >>$TOR_TORRC
     curl https://raw.githubusercontent.com/torproject/tor/master/contrib/operator-tools/tor-exit-notice.html --create-dirs -o /etc/tor/tor-exit-notice.html
   fi
 }
