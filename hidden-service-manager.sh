@@ -18,7 +18,6 @@ function dist-check() {
     # shellcheck disable=SC1091
     source /etc/os-release
     DISTRO=$ID
-    DISTRO_VERSION=$VERSION_ID
   fi
 }
 
@@ -301,6 +300,21 @@ function configure-ntp() {
 }
 
 configure-ntp
+
+function configure-firewall() {
+  if [ ! -f "$FAIL_TO_BAN_CONFIG" ]; then
+    sed -i "s|# bantime = 1h|bantime = 720h|" $FAIL_TO_BAN_CONFIG
+    sed -i "s|# enabled = true|enabled = true|" $FAIL_TO_BAN_CONFIG
+  fi
+  if [ -x "$(command -v ufw)" ]; then
+    ufw allow 80/tcp
+    ufw allow 22/tcp
+    ufw default reject incoming
+    ufw default reject outgoing
+  fi
+}
+
+configure-firewall
 
 function hidden-service-config() {
   if [ -f "$TOR_HIDDEN_SERVICE" ]; then
