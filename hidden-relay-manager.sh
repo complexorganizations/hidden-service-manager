@@ -1,44 +1,5 @@
 #!/bin/bash
 
-# Require script to be run as root
-function super-user-check() {
-  if [ "$EUID" -ne 0 ]; then
-    echo "You need to run this script as super user."
-    exit
-  fi
-}
-
-# Check for root
-super-user-check
-
-# Detect Operating System
-function dist-check() {
-  if [ -e /etc/os-release ]; then
-    # shellcheck disable=SC1091
-    source /etc/os-release
-    DISTRO=$ID
-    DISTRO_VERSION=$VERSION_ID
-  fi
-}
-
-# Check Operating System
-dist-check
-
-function installing-system-requirements() {
-  # shellcheck disable=SC2233,SC2050
-  if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
-    apt-get update && apt-get install curl bc jq -y
-    # shellcheck disable=SC2233,SC2050
-  elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "DISTRO" == "rhel" ]; }; then
-    yum update -y && yum install epel-release curl bc jq -y
-  elif [ "$DISTRO" == "arch" ]; then
-    pacman -Syu --noconfirm curl bc jq
-  fi
-}
-
-# Run the function and check for requirements
-installing-system-requirements
-
 # ask the user what to install
 function what-to-install() {
   echo "What would you like to install?"
@@ -260,32 +221,7 @@ ControlPort 9051
 CookieAuthentication 1" >>/etc/tor/torrc
     curl https://raw.githubusercontent.com/torproject/tor/master/contrib/operator-tools/tor-exit-notice.html --create-dirs -o /etc/tor/tor-exit-notice.html
   fi
-  if ([ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "rhel" ]); then
-    ntpdate pool.ntp.org
-  fi
 }
 
 # Install Tor
 install-tor
-
-# enable and than restart the defualt tor service
-function restart-service() {
-  if pgrep systemd-journal; then
-    # tor
-    systemctl enable tor@default
-    systemctl restart tor@default
-    # nyx
-    systemctl enable nyx
-    systemctl restart nyx
-  else
-    # tor
-    service tor@default enable
-    service tor@default restart
-    # nyx
-    service nyx enable
-    service nyx restart
-  fi
-}
-
-# enable and than restart the defualt tor service
-restart-service
