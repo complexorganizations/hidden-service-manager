@@ -449,14 +449,18 @@ else
   function after-install-questions() {
     if [ -f "$HIDDEN_SERVICE_MANAGER" ]; then
       echo "What do you want to do?"
-      echo "   1) Option One"
+      echo "   1) Update"
       echo "   2) Option Two"
       until [[ "$OPTIONS" =~ ^[0-9]+$ ]] && [ "$OPTIONS" -ge 1 ] && [ "$OPTIONS" -le 2 ]; do
         read -rp "Select an Option [1-2]: " -e -i 1 OPTIONS
       done
       case $OPTIONS in
       1)
-        ###
+        CURRENT_FILE_PATH="$(realpath "$0")"
+        if [ -f "$CURRENT_FILE_PATH" ]; then
+          curl -o "$CURRENT_FILE_PATH" $HIDDEN_SERVICE_MANAGER_UPDATE
+          chmod +x "$CURRENT_FILE_PATH" || exit
+        fi
         ;;
       2)
         ###
