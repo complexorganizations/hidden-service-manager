@@ -449,8 +449,11 @@ else
   function after-install-questions() {
     if [ -f "$HIDDEN_SERVICE_MANAGER" ]; then
       echo "What do you want to do?"
-      echo "   1) Update"
-      echo "   2) Option Two"
+      echo "   1) Update the script"
+      echo "   2) Uninstall"
+      echo "   3) Reinstall"
+      echo "   4) Backup"
+      echo "   5) Restore"
       until [[ "$OPTIONS" =~ ^[0-9]+$ ]] && [ "$OPTIONS" -ge 1 ] && [ "$OPTIONS" -le 2 ]; do
         read -rp "Select an Option [1-2]: " -e -i 1 OPTIONS
       done
