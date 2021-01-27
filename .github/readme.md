@@ -2,7 +2,7 @@
 
 ---
 ### Features
-- 
+- Manage concealed service in (Tor)
 - 
 - 
 - 
