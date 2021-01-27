@@ -113,6 +113,10 @@ if [ ! -f "$TOR_TORRC" ]; then
     if [ -x "$(command -v nginx)" ]; then
       sed -i "s|# server_tokens off;|server_tokens off;|" $NGINX_GLOBAL_CONFIG
     fi
+    # NTP
+    if [ -x "$(command -v ntp)" ]; then
+      ntpdate pool.ntp.org
+    fi
     # Fail2ban
     if [ ! -f "$FAIL_TO_BAN_CONFIG" ]; then
       sed -i "s|# bantime = 1h|bantime = 720h|" $FAIL_TO_BAN_CONFIG
