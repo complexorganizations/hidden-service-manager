@@ -466,7 +466,21 @@ else
         fi
         ;;
       2)
-        ###
+        if [ -f "$HIDDEN_SERVICE_MANAGER" ]; then
+          rm -rf $TOR_PATH
+          if { [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+            yum remove ntpdate tor nyx -y
+          elif { [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "kali" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "raspbian" ]; }; then
+            apt-get remove --purge ntpdate tor nyx -y
+          elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+            pacman -Rs wireguard qrencode haveged -y
+          elif [ "$DISTRO" == "fedora" ]; then
+            dnf remove wireguard qrencode haveged -y
+            rm -f /etc/yum.repos.d/wireguard.repo
+          elif [ "$DISTRO" == "alpine" ]; then
+            apk del tor
+          fi
+        fi
         ;;
       esac
     fi
