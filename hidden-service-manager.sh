@@ -454,10 +454,10 @@ else
       echo "   3) Reinstall"
       echo "   4) Backup"
       echo "   5) Restore"
-      until [[ "$OPTIONS" =~ ^[0-9]+$ ]] && [ "$OPTIONS" -ge 1 ] && [ "$OPTIONS" -le 2 ]; do
-        read -rp "Select an Option [1-2]: " -e -i 1 OPTIONS
+      until [[ "$HIDDEN_SERVICE_MANAGER_OPTIONS" =~ ^[0-9]+$ ]] && [ "$HIDDEN_SERVICE_MANAGER_OPTIONS" -ge 1 ] && [ "$HIDDEN_SERVICE_MANAGER_OPTIONS" -le 5 ]; do
+        read -rp "Select an Option [1-5]: " -e -i 1 HIDDEN_SERVICE_MANAGER_OPTIONS
       done
-      case $OPTIONS in
+      case $HIDDEN_SERVICE_MANAGER_OPTIONS in
       1)
         CURRENT_FILE_PATH="$(realpath "$0")"
         if [ -f "$CURRENT_FILE_PATH" ]; then
