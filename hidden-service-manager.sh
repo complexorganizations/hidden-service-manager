@@ -107,10 +107,21 @@ function secure-firewall() {
   # Secure Nginx
   if [ -x "$(command -v nginx)" ]; then
     sed -i "s|# server_tokens off;|server_tokens off;|" /etc/nginx/nginx.conf
+    chmod 700 /var/www/html/
   fi
   # Fail2ban
   if [ ! -f "/etc/fail2ban/jail.conf" ]; then
     sed -i "s|bantime = 600;|bantime = 1800;|" /etc/nginx/nginx.conf
+  fi
+}
+
+function configure-nginx() {
+  # Secure Nginx
+  if [ -x "$(command -v nginx)" ]; then
+    sed -i "s|listen 80 default_server;|listen 8080 default_server;|" /etc/nginx/sites-enabled/default
+    sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" /etc/nginx/sites-enabled/default
+    sed -i "s|#HiddenServiceDir /var/lib/tor/hidden_service/|HiddenServiceDir /var/lib/tor/hidden_service/|" /etc/tor/torrc
+    sed -i "s|#HiddenServicePort 80 127.0.0.1:80|HiddenServicePort 80 127.0.0.1:8080|" /etc/tor/torrc
   fi
 }
 
@@ -145,6 +156,9 @@ function secure-firewall() {
   }
   
   restart-service
+  
+  HOSTNAME=$(cat /var/lib/tor/hidden_service/hostname)
+  echo "Your Hostname: $HOSTNAME"
 
 else
 
