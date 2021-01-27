@@ -88,7 +88,33 @@ if [ ! -f "$TOR_TORRC" ]; then
 
   install-service
 
-  function configure-service() {
+function secure-firewall() {
+  # Install Firwall
+  if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
+    apt-get update
+    apt-get install ufw fail2ban -y
+  elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+    yum install ufw -y
+  elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+    pacman -Syu --noconfirm ufw fail2ban
+  elif [ "$DISTRO" == "alpine" ]; then
+    apk install ufw fail2ban
+  fi
+  # Configure UFW
+  if [ -x "$(command -v ufw)" ]; then
+    ufw allow 80/tcp
+  fi
+  # Secure Nginx
+  if [ -x "$(command -v nginx)" ]; then
+    sed -i "s|# server_tokens off;|server_tokens off;|" /etc/nginx/nginx.conf
+  fi
+  # Fail2ban
+  if [ ! -f "/etc/fail2ban/jail.conf" ]; then
+    sed -i "s|bantime = 600;|bantime = 1800;|" /etc/nginx/nginx.conf
+  fi
+}
+
+  function restart-service() {
     if pgrep systemd-journal; then
       # Tor
       systemctl enable tor
@@ -112,7 +138,7 @@ if [ ! -f "$TOR_TORRC" ]; then
     fi
   }
   
-  configure-service
+  restart-service
 
 else
 
