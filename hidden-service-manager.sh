@@ -77,6 +77,7 @@ function install-tor() {
       yum update
       yun install ntp tor nyx nginx -y 
     elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+      pacman -Syu
       pacman -Syu --noconfirm tor ntp nginx
     elif [ "$DISTRO" == "alpine" ]; then
       apk update
@@ -99,5 +100,6 @@ function configure-tor() {
 
 else
 
+## Update, Security...
 
 fi
