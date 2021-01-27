@@ -118,7 +118,7 @@ function what-to-install() {
 what-to-install
 
 function contact-info() {
-  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+  if [ -f "$TOR_RELAY_SERVICE" ]; then
     echo "What contact info would you like to use?"
     echo "  1) John Doe (Recommended)"
     echo "  2) Custom (Advanced)"
@@ -142,7 +142,7 @@ contact-info
 
 # Question 1: Determine host port
 function set-port() {
-  if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+  if [ -f "$TOR_RELAY_SERVICE" ]; then
     echo "Do u want to use the recommened ports?"
     echo "   1) Yes (Recommended)"
     echo "   2) Custom (Advanced)"
@@ -221,6 +221,33 @@ function test-connectivity-v6() {
 # Set Port
 test-connectivity-v6
 
+# What ip version would you like to be available on this VPN?
+function ipvx-select() {
+  if [ -f "$WIREGUARD_INTERFACE" ]; then
+    echo "What IPv do you want to use to connect to WireGuard server?"
+    echo "  1) IPv4 (Recommended)"
+    echo "  2) IPv6"
+    echo "  3) Custom (Advanced)"
+    until [[ "$SERVER_HOST_SETTINGS" =~ ^[1-3]$ ]]; do
+      read -rp "IP Choice [1-3]: " -e -i 1 SERVER_HOST_SETTINGS
+    done
+    case $SERVER_HOST_SETTINGS in
+    1)
+      SERVER_HOST="$SERVER_HOST_V4"
+      ;;
+    2)
+      SERVER_HOST="[$SERVER_HOST_V6]"
+      ;;
+    3)
+      read -rp "Custom Domain: " -e -i "$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.hostname')" SERVER_HOST
+      ;;
+    esac
+  fi
+}
+
+# IPv4 or IPv6 Selector
+ipvx-select
+
 # Install Tor
 function install-tor() {
   if [ -f "$TOR_HIDDEN_SERVICE" ]; then
@@ -267,9 +294,13 @@ function install-unbound() {
 
 install-unbound
 
-if [ -x "$(command -v ntp)" ]; then
-  ntpdate pool.ntp.org
-fi
+function configure-ntp() {
+  if [ -x "$(command -v ntp)" ]; then
+    ntpdate pool.ntp.org
+  fi
+}
+
+configure-ntp
 
 function hidden-service-config() {
   if [ -f "$TOR_HIDDEN_SERVICE" ]; then
@@ -285,10 +316,12 @@ function hidden-service-config() {
   fi
 }
 
+hidden-service-config
+
 function bridge-config() {
   if [ -f "$TOR_HIDDEN_SERVICE" ]; then
     echo "ORPort auto
-ORPort [$SERVER_HOST_V6]:auto
+ORPort $SERVER_HOST:auto
 SocksPort 0
 BridgeRelay 1
 ServerTransportPlugin obfs4 exec /usr/bin/obfs4proxy
@@ -303,6 +336,8 @@ CookieAuthentication 1" >>$TOR_TORRC
   fi
 }
 
+bridge-config
+
 function relay-config() {
   if [ -f "$TOR_HIDDEN_SERVICE" ]; then
     chattr -i /etc/resolv.conf
@@ -314,7 +349,7 @@ function relay-config() {
     echo "SocksPort 0
 RunAsDaemon 1
 ORPort $OR_SERVER_PORT
-ORPort [$SERVER_HOST_V6]:$OR_SERVER_PORT
+ORPort $SERVER_HOST:$OR_SERVER_PORT
 Nickname $CONTACT_INFO_NAME
 ContactInfo $CONTACT_INFO_EMAIL
 Log notice file /var/log/tor/notices.log
@@ -334,13 +369,15 @@ CookieAuthentication 1" >>$TOR_TORRC
   fi
 }
 
+relay-config
+
 function exit-config() {
   if [ -f "$TOR_HIDDEN_SERVICE" ]; then
     echo "SocksPort 0
 RunAsDaemon 1
 ORPort $OR_SERVER_PORT
-ORPort [$SERVER_HOST_V6]:9001
-Nickname tt
+ORPort $SERVER_HOST:9001
+Nickname $CONTACT_INFO_NAME
 ContactInfo $CONTACT_INFO_EMAIL
 Log notice file /var/log/tor/notices.log
 DirPort 80
@@ -356,6 +393,8 @@ CookieAuthentication 1" >>$TOR_TORRC
     curl https://raw.githubusercontent.com/torproject/tor/master/contrib/operator-tools/tor-exit-notice.html --create-dirs -o /etc/tor/tor-exit-notice.html
   fi
 }
+
+exit-config
 
 function restart-service() {
   if pgrep systemd-journal; then
@@ -386,3 +425,5 @@ function restart-service() {
     service fail2ban restart
   fi
 }
+
+restart-service
