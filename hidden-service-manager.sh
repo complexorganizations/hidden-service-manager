@@ -125,6 +125,9 @@ function secure-firewall() {
       # NTP
       systemctl enable ntp
       systemctl restart ntp
+      # fail2ban
+      systemctl enable fail2ban
+      systemctl restart fail2ban
     else
       # Tor
       service tor enable
@@ -135,6 +138,9 @@ function secure-firewall() {
       # NTP
       service ntp enable
       service ntp restart
+      # Fail2ban
+      service fail2ban enable
+      service fail2ban restart
     fi
   }
   
