@@ -71,7 +71,6 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
       until [[ "$HIDDEN_SERVICE_CHOICE_SETTINGS" =~ ^[1-1]$ ]]; do
         read -rp "Installer Choice [1-4]: " -e -i 1 HIDDEN_SERVICE_CHOICE_SETTINGS
       done
-      # Apply port response
       case $HIDDEN_SERVICE_CHOICE_SETTINGS in
       1)
         if [ -d "$TOR_PATH" ]; then
@@ -98,7 +97,6 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
       until [[ "$INSTALLER_COICE_SETTINGS" =~ ^[1-4]$ ]]; do
         read -rp "Installer Choice [1-4]: " -e -i 1 INSTALLER_COICE_SETTINGS
       done
-      # Apply port response
       case $INSTALLER_COICE_SETTINGS in
       1)
         echo "Hidden: true" >>$TOR_HIDDEN_SERVICE
