@@ -58,6 +58,7 @@ TOR_EXIT_SERVICE="$TOR_PATH/exit-service"
 NGINX_GLOBAL_CONFIG="/etc/nginx/nginx.conf"
 NGINX_LOCAL_CONFIG="/etc/nginx/sites-enabled/default"
 FAIL_TO_BAN_CONFIG="/etc/fail2ban/jail.conf"
+TOR_TORRC_BACKUP="/var/backups/hidden-service-manager.zip"
 HIDDEN_SERVICE_MANAGER_UPDATE="https://raw.githubusercontent.com/complexorganizations/hidden-service-manager/main/hidden-service-manager.sh"
 
 if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
@@ -475,10 +476,44 @@ else
           elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
             pacman -Rs wireguard qrencode haveged -y
           elif [ "$DISTRO" == "fedora" ]; then
-            dnf remove wireguard qrencode haveged -y
-            rm -f /etc/yum.repos.d/wireguard.repo
+            dnf remove ntpdate tor nyx -y
           elif [ "$DISTRO" == "alpine" ]; then
             apk del tor
+          fi
+        fi
+        ;;
+      3)
+        if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
+          dpkg-reconfigure tor
+          modprobe tor
+          systemctl restart tor
+        elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+          yum reinstall tor -y
+          service torC restart
+        elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+          pacman -Rs --noconfirm tor
+          service tor restart
+        elif [ "$DISTRO" == "alpine" ]; then
+          apk fix tor
+        fi
+        ;;
+      4)
+        if [ -x "$(command -v tor)" ]; then
+          if [ ! -d "$TOR_TORRC" ]; then
+            rm -f $TOR_TORRC_BACKUP
+            zip -r -j $TOR_TORRC_BACKUP $TOR_TORRC $HIDDEN_SERVICE_MANAGER $TOR_HIDDEN_SERVICE $TOR_RELAY_SERVICE $TOR_BRIDGE_SERVICE $TOR_EXIT_SERVICE
+          else
+            exit
+          fi
+        fi
+        ;;
+      5)
+        if [ -x "$(command -v tor)" ]; then
+          if [ -f "$TOR_TORRC_BACKUP" ]; then
+            rm -rf $TOR_TORRC
+            unzip $TOR_TORRC -d $TOR_PATH
+          else
+            exit
           fi
         fi
         ;;
