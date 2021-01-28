@@ -225,8 +225,8 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # What ip version would you like to be available on this VPN?
   function ipvx-select() {
-    if [ -f "$WIREGUARD_INTERFACE" ]; then
-      echo "What IPv do you want to use to connect to WireGuard server?"
+    if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+      echo "What IPv do you want to use?"
       echo "  1) IPv4 (Recommended)"
       echo "  2) IPv6"
       echo "  3) Custom (Advanced)"
@@ -474,7 +474,7 @@ else
           elif { [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "kali" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "raspbian" ]; }; then
             apt-get remove --purge ntpdate tor nyx -y
           elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
-            pacman -Rs wireguard qrencode haveged -y
+            pacman -Rs ntpdate tor nyx -y
           elif [ "$DISTRO" == "fedora" ]; then
             dnf remove ntpdate tor nyx -y
           elif [ "$DISTRO" == "alpine" ]; then
