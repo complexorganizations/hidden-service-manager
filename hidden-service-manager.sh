@@ -118,7 +118,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
   what-to-install
 
   function contact-info() {
-    if [ -f "$TOR_RELAY_SERVICE" ]; then
+    if { [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
       echo "What contact info would you like to use?"
       echo "  1) John Doe (Recommended)"
       echo "  2) Custom (Advanced)"
@@ -142,7 +142,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # Question 1: Determine host port
   function set-port() {
-    if [ -f "$TOR_RELAY_SERVICE" ]; then
+    if { [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
       echo "Do u want to use the recommened ports?"
       echo "   1) Yes (Recommended)"
       echo "   2) Custom (Advanced)"
@@ -169,7 +169,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # Determine host port
   function test-connectivity-v4() {
-    if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    if { [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
       echo "How would you like to detect IPV4?"
       echo "  1) Curl (Recommended)"
       echo "  2) IP (Advanced)"
@@ -196,7 +196,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # Determine ipv6
   function test-connectivity-v6() {
-    if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    if { [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
       echo "How would you like to detect IPV6?"
       echo "  1) Curl (Recommended)"
       echo "  2) IP (Advanced)"
@@ -223,7 +223,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # What ip version would you like to be available on this VPN?
   function ipvx-select() {
-    if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    if { [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
       echo "What IPv do you want to use?"
       echo "  1) IPv4 (Recommended)"
       echo "  2) IPv6"
@@ -250,8 +250,8 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # Install Tor
   function install-tor() {
-    if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-      if ! [ -x "$(command -v tor)" ]; then
+    if ! [ -x "$(command -v tor)" ]; then
+      if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
         if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
           apt-get update
           apt-get install ntpdate tor nyx -y
@@ -273,7 +273,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
   install-tor
 
   function install-unbound() {
-    if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
       if ! [ -x "$(command -v unbound)" ]; then
         if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
           apt-get update
@@ -296,7 +296,9 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   function configure-ntp() {
     if [ -x "$(command -v ntp)" ]; then
-      ntpdate pool.ntp.org
+      if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
+        ntpdate pool.ntp.org
+      fi
     fi
   }
 
