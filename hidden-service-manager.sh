@@ -317,8 +317,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
   configure-firewall
 
   function hidden-service-config() {
-    if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-    elif [ -x "$(command -v nginx)" ]; then
+    if [ -x "$(command -v nginx)" ]; then
       sed -i "s|listen 80 default_server;|listen 8080 default_server;|" $NGINX_LOCAL_CONFIG
       sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" $NGINX_LOCAL_CONFIG
       sed -i "s|# server_tokens off;|server_tokens off;|" $NGINX_GLOBAL_CONFIG
@@ -494,7 +493,7 @@ else
         ;;
       4)
         if [ -x "$(command -v tor)" ]; then
-          if [ ! -d "$TOR_TORRC" ]; then
+          if [ -d "$TOR_TORRC" ]; then
             rm -f $TOR_TORRC_BACKUP
             zip -r -j $TOR_TORRC_BACKUP $TOR_TORRC $HIDDEN_SERVICE_MANAGER $TOR_HIDDEN_SERVICE $TOR_RELAY_SERVICE $TOR_BRIDGE_SERVICE $TOR_EXIT_SERVICE
           else
