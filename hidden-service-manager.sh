@@ -27,7 +27,7 @@ dist-check
 # Pre-Checks system requirements
 function installing-system-requirements() {
   if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ] || [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ] || [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ] || [ "$DISTRO" == "alpine" ]; }; then
-    if { ! [ -x "$(command -v curl)" ] || ! [ -x "$(command -v iptables)" ] || ! [ -x "$(command -v bc)" ] || ! [ -x "$(command -v jq)" ] || ! [ -x "$(command -v sed)" ] || ! [ -x "$(command -v zip)" ] || ! [ -x "$(command -v unzip)" ] || ! [ -x "$(command -v grep)" ] || ! [ -x "$(command -v awk)" ] || ! [ -x "$(command -v ip)" ]; }; then
+    if { [ ! -x "$(command -v curl)" ] || [ ! -x "$(command -v iptables)" ] || [ ! -x "$(command -v bc)" ] || [ ! -x "$(command -v jq)" ] || [ ! -x "$(command -v sed)" ] || [ ! -x "$(command -v zip)" ] || [ ! -x "$(command -v unzip)" ] || [ ! -x "$(command -v grep)" ] || [ ! -x "$(command -v awk)" ] || [ ! -x "$(command -v ip)" ]; }; then
       if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
         apt-get update && apt-get install iptables curl coreutils bc jq sed e2fsprogs zip unzip grep gawk iproute2 -y
       elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
@@ -250,7 +250,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # Install Tor
   function install-tor() {
-    if ! [ -x "$(command -v tor)" ]; then
+    if [ ! -x "$(command -v tor)" ]; then
       if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
         if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
           apt-get update
@@ -273,7 +273,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
   install-tor
 
   function install-unbound() {
-      if ! [ -x "$(command -v unbound)" ]; then
+    if [ ! -x "$(command -v unbound)" ]; then
       if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
         if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
           apt-get update
@@ -296,17 +296,14 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   function configure-ntp() {
     if [ -x "$(command -v ntp)" ]; then
-      if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
         ntpdate pool.ntp.org
-      fi
     fi
   }
 
   configure-ntp
 
   function configure-firewall() {
-    if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
-    elif [ -f "$FAIL_TO_BAN_CONFIG" ]; then
+    if [ -f "$FAIL_TO_BAN_CONFIG" ]; then
       sed -i "s|# bantime = 1h|bantime = 720h|" $FAIL_TO_BAN_CONFIG
       sed -i "s|# enabled = true|enabled = true|" $FAIL_TO_BAN_CONFIG
     elif [ -x "$(command -v ufw)" ]; then
@@ -321,14 +318,13 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   function hidden-service-config() {
     if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-    elif [ -f "$TOR_HIDDEN_SERVICE" ]; then
-      elif [ -x "$(command -v nginx)" ]; then
-        sed -i "s|listen 80 default_server;|listen 8080 default_server;|" $NGINX_LOCAL_CONFIG
-        sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" $NGINX_LOCAL_CONFIG
-        sed -i "s|# server_tokens off;|server_tokens off;|" $NGINX_GLOBAL_CONFIG
-      elif [ -x "$(command -v tor)" ]; then
-        sed -i "s|#HiddenServiceDir /var/lib/tor/hidden_service/|HiddenServiceDir /var/lib/tor/hidden_service/|" $TOR_TORRC
-        sed -i "s|#HiddenServicePort 80 127.0.0.1:80|HiddenServicePort 80 127.0.0.1:8080|" $TOR_TORRC
+    elif [ -x "$(command -v nginx)" ]; then
+      sed -i "s|listen 80 default_server;|listen 8080 default_server;|" $NGINX_LOCAL_CONFIG
+      sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" $NGINX_LOCAL_CONFIG
+      sed -i "s|# server_tokens off;|server_tokens off;|" $NGINX_GLOBAL_CONFIG
+    elif [ -x "$(command -v tor)" ]; then
+      sed -i "s|#HiddenServiceDir /var/lib/tor/hidden_service/|HiddenServiceDir /var/lib/tor/hidden_service/|" $TOR_TORRC
+      sed -i "s|#HiddenServicePort 80 127.0.0.1:80|HiddenServicePort 80 127.0.0.1:8080|" $TOR_TORRC
     fi
   }
 
