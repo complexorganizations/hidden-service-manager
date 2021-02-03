@@ -273,8 +273,8 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
   install-tor
 
   function install-unbound() {
-    if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
       if ! [ -x "$(command -v unbound)" ]; then
+      if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
         if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
           apt-get update
           apt-get install unbound -y
@@ -305,11 +305,11 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
   configure-ntp
 
   function configure-firewall() {
-    if [ ! -f "$FAIL_TO_BAN_CONFIG" ]; then
+    if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
+    elif [ -f "$FAIL_TO_BAN_CONFIG" ]; then
       sed -i "s|# bantime = 1h|bantime = 720h|" $FAIL_TO_BAN_CONFIG
       sed -i "s|# enabled = true|enabled = true|" $FAIL_TO_BAN_CONFIG
-    fi
-    if [ -x "$(command -v ufw)" ]; then
+    elif [ -x "$(command -v ufw)" ]; then
       ufw allow 80/tcp
       ufw allow 22/tcp
       ufw default reject incoming
@@ -321,15 +321,14 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   function hidden-service-config() {
     if [ -f "$TOR_HIDDEN_SERVICE" ]; then
-      if [ -x "$(command -v nginx)" ]; then
+    elif [ -f "$TOR_HIDDEN_SERVICE" ]; then
+      elif [ -x "$(command -v nginx)" ]; then
         sed -i "s|listen 80 default_server;|listen 8080 default_server;|" $NGINX_LOCAL_CONFIG
         sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" $NGINX_LOCAL_CONFIG
         sed -i "s|# server_tokens off;|server_tokens off;|" $NGINX_GLOBAL_CONFIG
-      fi
-      if [ -x "$(command -v tor)" ]; then
+      elif [ -x "$(command -v tor)" ]; then
         sed -i "s|#HiddenServiceDir /var/lib/tor/hidden_service/|HiddenServiceDir /var/lib/tor/hidden_service/|" $TOR_TORRC
         sed -i "s|#HiddenServicePort 80 127.0.0.1:80|HiddenServicePort 80 127.0.0.1:8080|" $TOR_TORRC
-      fi
     fi
   }
 
@@ -448,7 +447,7 @@ CookieAuthentication 1" >>$TOR_TORRC
 else
 
   function after-install-questions() {
-    if [ -f "$HIDDEN_SERVICE_MANAGER" ]; then
+    if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
       echo "What do you want to do?"
       echo "   1) Update the script"
       echo "   2) Uninstall"
