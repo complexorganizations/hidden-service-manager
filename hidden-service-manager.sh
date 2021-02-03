@@ -334,7 +334,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
   hidden-service-config
 
   function bridge-config() {
-    if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    if [ -f "$TOR_BRIDGE_SERVICE" ]; then
       echo "ORPort auto
 ORPort $SERVER_HOST:auto
 SocksPort 0
@@ -354,7 +354,7 @@ CookieAuthentication 1" >>$TOR_TORRC
   bridge-config
 
   function relay-config() {
-    if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    if [ -f "$TOR_RELAY_SERVICE" ]; then
       chattr -i /etc/resolv.conf
       sed -i "s|nameserver|#nameserver|" /etc/resolv.conf
       sed -i "s|search|#search|" /etc/resolv.conf
