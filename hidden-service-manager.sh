@@ -3,7 +3,7 @@
 
 # Require script to be run as root
 function super-user-check() {
-  if [ "$EUID" -ne 0 ]; then
+  if [ "${EUID}" -ne 0 ]; then
     echo "You need to run this script as super user."
     exit
   fi
@@ -17,7 +17,7 @@ function dist-check() {
   if [ -e /etc/os-release ]; then
     # shellcheck disable=SC1091
     source /etc/os-release
-    DISTRO=$ID
+    DISTRO=${ID}
   fi
 }
 
@@ -26,20 +26,20 @@ dist-check
 
 # Pre-Checks system requirements
 function installing-system-requirements() {
-  if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ] || [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ] || [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ] || [ "$DISTRO" == "alpine" ]; }; then
+  if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ] || [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ] || [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ] || [ "${DISTRO}" == "alpine" ]; }; then
     if { [ ! -x "$(command -v curl)" ] || [ ! -x "$(command -v iptables)" ] || [ ! -x "$(command -v bc)" ] || [ ! -x "$(command -v jq)" ] || [ ! -x "$(command -v sed)" ] || [ ! -x "$(command -v zip)" ] || [ ! -x "$(command -v unzip)" ] || [ ! -x "$(command -v grep)" ] || [ ! -x "$(command -v awk)" ] || [ ! -x "$(command -v ip)" ]; }; then
-      if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
+      if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ]; }; then
         apt-get update && apt-get install iptables curl coreutils bc jq sed e2fsprogs zip unzip grep gawk iproute2 -y
-      elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+      elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ]; }; then
         yum update -y && yum install epel-release iptables curl coreutils bc jq sed e2fsprogs zip unzip grep gawk iproute2 -y
-      elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+      elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
         pacman -Syu --noconfirm iptables curl bc jq sed zip unzip grep gawk iproute2
-      elif [ "$DISTRO" == "alpine" ]; then
+      elif [ "${DISTRO}" == "alpine" ]; then
         apk update && apk add iptables curl bc jq sed zip unzip grep gawk iproute2
       fi
     fi
   else
-    echo "Error: $DISTRO not supported."
+    echo "Error: ${DISTRO} not supported."
     exit
   fi
 }
@@ -49,35 +49,35 @@ installing-system-requirements
 
 # Global variables
 TOR_PATH="/etc/tor"
-TOR_TORRC="$TOR_PATH/torrc"
-HIDDEN_SERVICE_MANAGER="$TOR_PATH/hidden-service-manager"
-TOR_HIDDEN_SERVICE="$TOR_PATH/hidden-service"
-TOR_RELAY_SERVICE="$TOR_PATH/relay-service"
-TOR_BRIDGE_SERVICE="$TOR_PATH/bridge-service"
-TOR_EXIT_SERVICE="$TOR_PATH/exit-service"
+TOR_TORRC="${TOR_PATH}/torrc"
+HIDDEN_SERVICE_MANAGER="${TOR_PATH}/hidden-service-manager"
+TOR_HIDDEN_SERVICE="${TOR_PATH}/hidden-service"
+TOR_RELAY_SERVICE="${TOR_PATH}/relay-service"
+TOR_BRIDGE_SERVICE="${TOR_PATH}/bridge-service"
+TOR_EXIT_SERVICE="${TOR_PATH}/exit-service"
 NGINX_GLOBAL_CONFIG="/etc/nginx/nginx.conf"
 NGINX_LOCAL_CONFIG="/etc/nginx/sites-enabled/default"
 FAIL_TO_BAN_CONFIG="/etc/fail2ban/jail.conf"
 TOR_TORRC_BACKUP="/var/backups/hidden-service-manager.zip"
 HIDDEN_SERVICE_MANAGER_UPDATE="https://raw.githubusercontent.com/complexorganizations/hidden-service-manager/main/hidden-service-manager.sh"
 
-if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
+if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
 
   # ask the user what to install
   function choose-hidden-service() {
-    if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
+    if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
       echo "What would you like to install?"
       echo "  1) TOR (Recommended)"
-      until [[ "$HIDDEN_SERVICE_CHOICE_SETTINGS" =~ ^[1-1]$ ]]; do
+      until [[ "${HIDDEN_SERVICE_CHOICE_SETTINGS}" =~ ^[1-1]$ ]]; do
         read -rp "Installer Choice [1-4]: " -e -i 1 HIDDEN_SERVICE_CHOICE_SETTINGS
       done
-      case $HIDDEN_SERVICE_CHOICE_SETTINGS in
+      case ${HIDDEN_SERVICE_CHOICE_SETTINGS} in
       1)
-        if [ -d "$TOR_PATH" ]; then
-          rm -rf $TOR_PATH
+        if [ -d "${TOR_PATH}" ]; then
+          rm -rf ${TOR_PATH}
         fi
-        mkdir -p $TOR_PATH
-        echo "TOR: true" >>$HIDDEN_SERVICE_MANAGER
+        mkdir -p ${TOR_PATH}
+        echo "TOR: true" >>${HIDDEN_SERVICE_MANAGER}
         ;;
       esac
     fi
@@ -88,27 +88,27 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # ask the user what to install
   function what-to-install() {
-    if [ -f "$HIDDEN_SERVICE_MANAGER" ]; then
+    if [ -f "${HIDDEN_SERVICE_MANAGER}" ]; then
       echo "What would you like to install?"
       echo "  1) Hidden Service (Recommended)"
       echo "  2) Relay"
       echo "  3) Bridge"
       echo "  4) Exit Node (Advanced)"
-      until [[ "$INSTALLER_COICE_SETTINGS" =~ ^[1-4]$ ]]; do
+      until [[ "${INSTALLER_COICE_SETTINGS}" =~ ^[1-4]$ ]]; do
         read -rp "Installer Choice [1-4]: " -e -i 1 INSTALLER_COICE_SETTINGS
       done
-      case $INSTALLER_COICE_SETTINGS in
+      case ${INSTALLER_COICE_SETTINGS} in
       1)
-        echo "Hidden: true" >>$TOR_HIDDEN_SERVICE
+        echo "Hidden: true" >>${TOR_HIDDEN_SERVICE}
         ;;
       2)
-        echo "Relay: true" >>$TOR_RELAY_SERVICE
+        echo "Relay: true" >>${TOR_RELAY_SERVICE}
         ;;
       3)
-        echo "Bridge: true" >>$TOR_BRIDGE_SERVICE
+        echo "Bridge: true" >>${TOR_BRIDGE_SERVICE}
         ;;
       4)
-        echo "Exit: true" >>$TOR_EXIT_SERVICE
+        echo "Exit: true" >>${TOR_EXIT_SERVICE}
         ;;
       esac
     fi
@@ -118,14 +118,14 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
   what-to-install
 
   function contact-info() {
-    if { [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
+    if { [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
       echo "What contact info would you like to use?"
       echo "  1) John Doe (Recommended)"
       echo "  2) Custom (Advanced)"
-      until [[ "$CONTACT_INFO_SETTINGS" =~ ^[1-3]$ ]]; do
+      until [[ "${CONTACT_INFO_SETTINGS}" =~ ^[1-3]$ ]]; do
         read -rp "Contact Info [1-3]: " -e -i 1 CONTACT_INFO_SETTINGS
       done
-      case $CONTACT_INFO_SETTINGS in
+      case ${CONTACT_INFO_SETTINGS} in
       1)
         CONTACT_INFO_NAME="John Doe"
         CONTACT_INFO_EMAIL="johndoe@example.com"
@@ -142,14 +142,14 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # Question 1: Determine host port
   function set-port() {
-    if { [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
+    if { [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
       echo "Do u want to use the recommened ports?"
       echo "   1) Yes (Recommended)"
       echo "   2) Custom (Advanced)"
-      until [[ "$PORT_CHOICE_SETTINGS" =~ ^[1-2]$ ]]; do
+      until [[ "${PORT_CHOICE_SETTINGS}" =~ ^[1-2]$ ]]; do
         read -rp "Port choice [1-2]: " -e -i 1 PORT_CHOICE_SETTINGS
       done
-      case $PORT_CHOICE_SETTINGS in
+      case ${PORT_CHOICE_SETTINGS} in
       1)
         OR_SERVER_PORT="9001"
         DIR_SERVER_PORT="9030"
@@ -169,15 +169,15 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # Determine host port
   function test-connectivity-v4() {
-    if { [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
+    if { [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
       echo "How would you like to detect IPV4?"
       echo "  1) Curl (Recommended)"
       echo "  2) IP (Advanced)"
       echo "  3) Custom (Advanced)"
-      until [[ "$SERVER_HOST_V4_SETTINGS" =~ ^[1-3]$ ]]; do
+      until [[ "${SERVER_HOST_V4_SETTINGS}" =~ ^[1-3]$ ]]; do
         read -rp "ipv4 choice [1-3]: " -e -i 1 SERVER_HOST_V4_SETTINGS
       done
-      case $SERVER_HOST_V4_SETTINGS in
+      case ${SERVER_HOST_V4_SETTINGS} in
       1)
         SERVER_HOST_V4="$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
         ;;
@@ -196,7 +196,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # Determine ipv6
   function test-connectivity-v6() {
-    if { [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
+    if { [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
       echo "How would you like to detect IPV6?"
       echo "  1) Curl (Recommended)"
       echo "  2) IP (Advanced)"
@@ -223,7 +223,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   # What ip version would you like to be available on this VPN?
   function ipvx-select() {
-    if { [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
+    if { [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
       echo "What IPv do you want to use?"
       echo "  1) IPv4 (Recommended)"
       echo "  2) IPv6"
@@ -233,7 +233,7 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
       done
       case $SERVER_HOST_SETTINGS in
       1)
-        SERVER_HOST="$SERVER_HOST_V4"
+        SERVER_HOST="${SERVER_HOST_V4}"
         ;;
       2)
         SERVER_HOST="[$SERVER_HOST_V6]"
@@ -251,17 +251,17 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
   # Install Tor
   function install-tor() {
     if [ ! -x "$(command -v tor)" ]; then
-      if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
-        if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
+      if { [ -f "${TOR_HIDDEN_SERVICE}" ] || [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
+        if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ]; }; then
           apt-get update
           apt-get install ntpdate tor nyx -y
-        elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+        elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ]; }; then
           yum update
           yun install ntp tor nyx -y
-        elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+        elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
           pacman -Syu
           pacman -Syu --noconfirm tor ntp
-        elif [ "$DISTRO" == "alpine" ]; then
+        elif [ "${DISTRO}" == "alpine" ]; then
           apk update
           apk add tor ntp
         fi
@@ -274,17 +274,17 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   function install-unbound() {
     if [ ! -x "$(command -v unbound)" ]; then
-      if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
-        if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
+      if { [ -f "${TOR_HIDDEN_SERVICE}" ] || [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
+        if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ]; }; then
           apt-get update
           apt-get install unbound -y
-        elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+        elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ]; }; then
           yum update
           yun install unbound -y
-        elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+        elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
           pacman -Syu
           pacman -Syu --noconfirm unbound
-        elif [ "$DISTRO" == "alpine" ]; then
+        elif [ "${DISTRO}" == "alpine" ]; then
           apk update
           apk add unbound
         fi
@@ -303,9 +303,9 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
   configure-ntp
 
   function configure-firewall() {
-    if [ -f "$FAIL_TO_BAN_CONFIG" ]; then
-      sed -i "s|# bantime = 1h|bantime = 720h|" $FAIL_TO_BAN_CONFIG
-      sed -i "s|# enabled = true|enabled = true|" $FAIL_TO_BAN_CONFIG
+    if [ -f "${FAIL_TO_BAN_CONFIG}" ]; then
+      sed -i "s|# bantime = 1h|bantime = 720h|" ${FAIL_TO_BAN_CONFIG}
+      sed -i "s|# enabled = true|enabled = true|" ${FAIL_TO_BAN_CONFIG}
     elif [ -x "$(command -v ufw)" ]; then
       ufw allow 80/tcp
       ufw allow 22/tcp
@@ -318,21 +318,21 @@ if [ ! -f "$HIDDEN_SERVICE_MANAGER" ]; then
 
   function hidden-service-config() {
     if [ -x "$(command -v nginx)" ]; then
-      sed -i "s|listen 80 default_server;|listen 8080 default_server;|" $NGINX_LOCAL_CONFIG
-      sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" $NGINX_LOCAL_CONFIG
-      sed -i "s|# server_tokens off;|server_tokens off;|" $NGINX_GLOBAL_CONFIG
+      sed -i "s|listen 80 default_server;|listen 8080 default_server;|" ${NGINX_LOCAL_CONFIG}
+      sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" ${NGINX_LOCAL_CONFIG}
+      sed -i "s|# server_tokens off;|server_tokens off;|" ${NGINX_GLOBAL_CONFIG}
     elif [ -x "$(command -v tor)" ]; then
-      sed -i "s|#HiddenServiceDir /var/lib/tor/hidden_service/|HiddenServiceDir /var/lib/tor/hidden_service/|" $TOR_TORRC
-      sed -i "s|#HiddenServicePort 80 127.0.0.1:80|HiddenServicePort 80 127.0.0.1:8080|" $TOR_TORRC
+      sed -i "s|#HiddenServiceDir /var/lib/tor/hidden_service/|HiddenServiceDir /var/lib/tor/hidden_service/|" ${TOR_TORRC}
+      sed -i "s|#HiddenServicePort 80 127.0.0.1:80|HiddenServicePort 80 127.0.0.1:8080|" ${TOR_TORRC}
     fi
   }
 
   hidden-service-config
 
   function bridge-config() {
-    if [ -f "$TOR_BRIDGE_SERVICE" ]; then
+    if [ -f "${TOR_BRIDGE_SERVICE}" ]; then
       echo "ORPort auto
-ORPort $SERVER_HOST:auto
+ORPort ${SERVER_HOST}:auto
 SocksPort 0
 BridgeRelay 1
 ServerTransportPlugin obfs4 exec /usr/bin/obfs4proxy
@@ -342,15 +342,15 @@ ExtOrPort auto
 Log notice file /var/log/tor/notices.log
 ExitPolicy reject6 *:*, reject *:*
 DisableDebuggerAttachment 0
-ControlPort $CON_SERVER_PORT
-CookieAuthentication 1" >>$TOR_TORRC
+ControlPort ${CON_SERVER_PORT}
+CookieAuthentication 1" >>${TOR_TORRC}
     fi
   }
 
   bridge-config
 
   function relay-config() {
-    if [ -f "$TOR_RELAY_SERVICE" ]; then
+    if [ -f "${TOR_RELAY_SERVICE}" ]; then
       chattr -i /etc/resolv.conf
       sed -i "s|nameserver|#nameserver|" /etc/resolv.conf
       sed -i "s|search|#search|" /etc/resolv.conf
@@ -359,16 +359,16 @@ CookieAuthentication 1" >>$TOR_TORRC
       # torrc file
       echo "SocksPort 0
 RunAsDaemon 1
-ORPort $OR_SERVER_PORT
-ORPort $SERVER_HOST:$OR_SERVER_PORT
-Nickname $CONTACT_INFO_NAME
-ContactInfo $CONTACT_INFO_EMAIL
+ORPort ${OR_SERVER_PORT}
+ORPort ${SERVER_HOST}:${OR_SERVER_PORT}
+Nickname ${CONTACT_INFO_NAME}
+ContactInfo ${CONTACT_INFO_EMAIL}
 Log notice file /var/log/tor/notices.log
-DirPort $DIR_SERVER_PORT
+DirPort ${DIR_SERVER_PORT}
 ExitPolicy reject6 *:*, reject *:*
 DisableDebuggerAttachment 0
-ControlPort $CON_SERVER_PORT
-CookieAuthentication 1" >>$TOR_TORRC
+ControlPort ${CON_SERVER_PORT}
+CookieAuthentication 1" >>${TOR_TORRC}
       # enable and restart service
       if pgrep systemd-journal; then
         systemctl enable unbound
@@ -383,13 +383,13 @@ CookieAuthentication 1" >>$TOR_TORRC
   relay-config
 
   function exit-config() {
-    if [ -f "$TOR_HIDDEN_SERVICE" ]; then
+    if [ -f "${TOR_HIDDEN_SERVICE}" ]; then
       echo "SocksPort 0
 RunAsDaemon 1
-ORPort $OR_SERVER_PORT
-ORPort $SERVER_HOST:9001
-Nickname $CONTACT_INFO_NAME
-ContactInfo $CONTACT_INFO_EMAIL
+ORPort ${OR_SERVER_PORT}
+ORPort ${SERVER_HOST}:9001
+Nickname ${CONTACT_INFO_NAME}
+ContactInfo ${CONTACT_INFO_EMAIL}
 Log notice file /var/log/tor/notices.log
 DirPort 80
 DirPortFrontPage /etc/tor/tor-exit-notice.html
@@ -400,7 +400,7 @@ ExitPolicy reject *:*
 IPv6Exit 1
 DisableDebuggerAttachment 0
 ControlPort 9051
-CookieAuthentication 1" >>$TOR_TORRC
+CookieAuthentication 1" >>${TOR_TORRC}
       curl https://raw.githubusercontent.com/torproject/tor/master/contrib/operator-tools/tor-exit-notice.html --create-dirs -o /etc/tor/tor-exit-notice.html
     fi
   }
@@ -442,60 +442,60 @@ CookieAuthentication 1" >>$TOR_TORRC
 else
 
   function after-install-questions() {
-    if { [ -f "$TOR_HIDDEN_SERVICE" ] || [ -f "$TOR_RELAY_SERVICE" ] || [ -f "$TOR_BRIDGE_SERVICE" ] || [ -f "$TOR_EXIT_SERVICE" ]; }; then
+    if { [ -f "${TOR_HIDDEN_SERVICE}" ] || [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
       echo "What do you want to do?"
       echo "   1) Update the script"
       echo "   2) Uninstall"
       echo "   3) Reinstall"
       echo "   4) Backup"
       echo "   5) Restore"
-      until [[ "$HIDDEN_SERVICE_MANAGER_OPTIONS" =~ ^[0-9]+$ ]] && [ "$HIDDEN_SERVICE_MANAGER_OPTIONS" -ge 1 ] && [ "$HIDDEN_SERVICE_MANAGER_OPTIONS" -le 5 ]; do
+      until [[ "${HIDDEN_SERVICE_MANAGER_OPTIONS}" =~ ^[0-9]+$ ]] && [ "${HIDDEN_SERVICE_MANAGER_OPTIONS}" -ge 1 ] && [ "${HIDDEN_SERVICE_MANAGER_OPTIONS}" -le 5 ]; do
         read -rp "Select an Option [1-5]: " -e -i 1 HIDDEN_SERVICE_MANAGER_OPTIONS
       done
-      case $HIDDEN_SERVICE_MANAGER_OPTIONS in
+      case ${HIDDEN_SERVICE_MANAGER_OPTIONS} in
       1)
         CURRENT_FILE_PATH="$(realpath "$0")"
-        if [ -f "$CURRENT_FILE_PATH" ]; then
-          curl -o "$CURRENT_FILE_PATH" $HIDDEN_SERVICE_MANAGER_UPDATE
-          chmod +x "$CURRENT_FILE_PATH" || exit
+        if [ -f "${CURRENT_FILE_PATH}" ]; then
+          curl -o "${CURRENT_FILE_PATH}" ${HIDDEN_SERVICE_MANAGER_UPDATE}
+          chmod +x "${CURRENT_FILE_PATH}" || exit
         fi
         ;;
       2)
-        if [ -f "$HIDDEN_SERVICE_MANAGER" ]; then
-          rm -rf $TOR_PATH
-          if { [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+        if [ -f "${HIDDEN_SERVICE_MANAGER}" ]; then
+          rm -rf ${TOR_PATH}
+          if { [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ]; }; then
             yum remove ntpdate tor nyx -y
-          elif { [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "kali" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "raspbian" ]; }; then
+          elif { [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "kali" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "raspbian" ]; }; then
             apt-get remove --purge ntpdate tor nyx -y
-          elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+          elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
             pacman -Rs ntpdate tor nyx -y
-          elif [ "$DISTRO" == "fedora" ]; then
+          elif [ "${DISTRO}" == "fedora" ]; then
             dnf remove ntpdate tor nyx -y
-          elif [ "$DISTRO" == "alpine" ]; then
+          elif [ "${DISTRO}" == "alpine" ]; then
             apk del tor
           fi
         fi
         ;;
       3)
-        if { [ "$DISTRO" == "ubuntu" ] || [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "raspbian" ] || [ "$DISTRO" == "pop" ] || [ "$DISTRO" == "kali" ]; }; then
+        if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ]; }; then
           dpkg-reconfigure tor
           modprobe tor
           systemctl restart tor
-        elif { [ "$DISTRO" == "fedora" ] || [ "$DISTRO" == "centos" ] || [ "$DISTRO" == "rhel" ]; }; then
+        elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ]; }; then
           yum reinstall tor -y
           service torC restart
-        elif { [ "$DISTRO" == "arch" ] || [ "$DISTRO" == "manjaro" ]; }; then
+        elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
           pacman -Rs --noconfirm tor
           service tor restart
-        elif [ "$DISTRO" == "alpine" ]; then
+        elif [ "${DISTRO}" == "alpine" ]; then
           apk fix tor
         fi
         ;;
       4)
         if [ -x "$(command -v tor)" ]; then
-          if [ -d "$TOR_TORRC" ]; then
-            rm -f $TOR_TORRC_BACKUP
-            zip -r -j $TOR_TORRC_BACKUP $TOR_TORRC $HIDDEN_SERVICE_MANAGER $TOR_HIDDEN_SERVICE $TOR_RELAY_SERVICE $TOR_BRIDGE_SERVICE $TOR_EXIT_SERVICE
+          if [ -d "${TOR_TORRC}" ]; then
+            rm -f ${TOR_TORRC_BACKUP}
+            zip -r -j ${TOR_TORRC_BACKUP} ${TOR_TORRC} ${HIDDEN_SERVICE_MANAGER} ${TOR_HIDDEN_SERVICE} ${TOR_RELAY_SERVICE} ${TOR_BRIDGE_SERVICE} ${TOR_EXIT_SERVICE}
           else
             exit
           fi
@@ -503,9 +503,9 @@ else
         ;;
       5)
         if [ -x "$(command -v tor)" ]; then
-          if [ -f "$TOR_TORRC_BACKUP" ]; then
-            rm -rf $TOR_TORRC
-            unzip $TOR_TORRC -d $TOR_PATH
+          if [ -f "${TOR_TORRC_BACKUP}" ]; then
+            rm -rf ${TOR_TORRC}
+            unzip ${TOR_TORRC} -d ${TOR_PATH}
           else
             exit
           fi
