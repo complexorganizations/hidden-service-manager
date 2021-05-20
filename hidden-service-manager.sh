@@ -120,19 +120,15 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
     if { [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
       echo "What contact info would you like to use?"
       echo "  1) John Doe (Recommended)"
-      echo "  2) Custom (Advanced)"
-      until [[ "${CONTACT_INFO_SETTINGS}" =~ ^[1-3]$ ]]; do
-        read -rp "Contact Info [1-3]: " -e -i 1 CONTACT_INFO_SETTINGS
+      until [[ "${CONTACT_INFO_SETTINGS}" =~ ^[1-1]$ ]]; do
+        read -rp "Contact Info [1-1]: " -e -i 1 CONTACT_INFO_SETTINGS
       done
       case ${CONTACT_INFO_SETTINGS} in
       1)
         CONTACT_INFO_NAME="John Doe"
         CONTACT_INFO_EMAIL="johndoe@example.com"
         ;;
-      2)
-        read -rp "Custom Name: " -e -i "John Doe" CONTACT_INFO_NAME
-        read -rp "Custom Email: " -e -i "johndoe@example.com" CONTACT_INFO_EMAIL
-        ;;
+        # There's no point in providing contact information with a secret utility if you don't have to.
       esac
     fi
   }
@@ -172,7 +168,7 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
       if { [ -f "${TOR_HIDDEN_SERVICE}" ] || [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
         if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ]; }; then
           apt-get update
-          apt-get install ntpdate tor nyx -y
+          apt-get install ntpdate tor nyx obfs4proxy -y
         elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ]; }; then
           yum update
           yun install ntp tor nyx -y
