@@ -35,7 +35,7 @@ function installing-system-requirements() {
       elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ]; }; then
         yum update -y && yum install epel-release iptables curl coreutils bc jq sed e2fsprogs zip unzip grep gawk iproute2 -y
       elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
-        pacman -Syu --noconfirm iptables curl bc jq sed zip unzip grep gawk iproute2
+        pacman -Syu --noconfirm --needed iptables curl bc jq sed zip unzip grep gawk iproute2
       elif [ "${DISTRO}" == "alpine" ]; then
         apk update && apk add iptables curl bc jq sed zip unzip grep gawk iproute2
       fi
@@ -196,7 +196,7 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
           yun install unbound -y
         elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
           pacman -Syu
-          pacman -Syu --noconfirm unbound
+          pacman -Syu --noconfirm --needed unbound
         elif [ "${DISTRO}" == "alpine" ]; then
           apk update
           apk add unbound
