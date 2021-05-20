@@ -362,6 +362,7 @@ ORPort ${OR_SERVER_PORT}
 ExitRelay 0
 SocksPort 0
 ControlSocket 0
+ControlPort ${CON_SERVER_PORT}
 ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
       # enable and restart service
       if pgrep systemd-journal; then
