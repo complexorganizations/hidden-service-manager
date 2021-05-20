@@ -57,9 +57,6 @@ TOR_HIDDEN_SERVICE="${TOR_PATH}/hidden-service"
 TOR_RELAY_SERVICE="${TOR_PATH}/relay-service"
 TOR_BRIDGE_SERVICE="${TOR_PATH}/bridge-service"
 TOR_EXIT_SERVICE="${TOR_PATH}/exit-service"
-NGINX_GLOBAL_CONFIG="/etc/nginx/nginx.conf"
-NGINX_LOCAL_CONFIG="/etc/nginx/sites-enabled/default"
-FAIL_TO_BAN_CONFIG="/etc/fail2ban/jail.conf"
 TOR_TORRC_BACKUP="/var/backups/hidden-service-manager.zip"
 HIDDEN_SERVICE_MANAGER_UPDATE="https://raw.githubusercontent.com/complexorganizations/hidden-service-manager/main/hidden-service-manager.sh"
 
@@ -222,19 +219,6 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
   }
 
   configure-ntp
-
-  function configure-firewall() {
-    if [ -f "${FAIL_TO_BAN_CONFIG}" ]; then
-      sed -i "s|# bantime = 1h|bantime = 720h|" ${FAIL_TO_BAN_CONFIG}
-      sed -i "s|# enabled = true|enabled = true|" ${FAIL_TO_BAN_CONFIG}
-    elif [ -x "$(command -v ufw)" ]; then
-      ufw allow 22/tcp
-      ufw default allow incoming
-      ufw default allow outgoing
-    fi
-  }
-
-  configure-firewall
 
   function bridge-config() {
     if [ -f "${TOR_BRIDGE_SERVICE}" ]; then
