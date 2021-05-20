@@ -357,18 +357,12 @@ CookieAuthentication 1" >>${TOR_TORRC}
       echo "nameserver 127.0.0.1" >>/etc/resolv.conf
       chattr +i /etc/resolv.conf
       # torrc file
-      echo "SocksPort 0
-RunAsDaemon 1
+      echo "Nickname ${CONTACT_INFO_NAME}
 ORPort ${OR_SERVER_PORT}
-ORPort ${SERVER_HOST}:${OR_SERVER_PORT}
-Nickname ${CONTACT_INFO_NAME}
-ContactInfo ${CONTACT_INFO_EMAIL}
-Log notice file /var/log/tor/notices.log
-DirPort ${DIR_SERVER_PORT}
-ExitPolicy reject6 *:*, reject *:*
-DisableDebuggerAttachment 0
-ControlPort ${CON_SERVER_PORT}
-CookieAuthentication 1" >>${TOR_TORRC}
+ExitRelay 0
+SocksPort 0
+ControlSocket 0
+ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
       # enable and restart service
       if pgrep systemd-journal; then
         systemctl enable unbound
