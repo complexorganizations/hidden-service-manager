@@ -59,8 +59,8 @@ TOR_BRIDGE_SERVICE="${TOR_PATH}/bridge-service"
 TOR_EXIT_SERVICE="${TOR_PATH}/exit-service"
 TOR_TORRC_BACKUP="/var/backups/hidden-service-manager.zip"
 HIDDEN_SERVICE_MANAGER_UPDATE="https://raw.githubusercontent.com/complexorganizations/hidden-service-manager/main/hidden-service-manager.sh"
-CONTACT_INFO_NAME="$(openssl rand -base64 10)"
-CONTACT_INFO_EMAIL="$(openssl rand -base64 25)"
+CONTACT_INFO_NAME="$(openssl rand -hex 10)"
+CONTACT_INFO_EMAIL="$(openssl rand -hex 25)"
 
 if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
 
