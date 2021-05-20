@@ -334,19 +334,14 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
 
   function bridge-config() {
     if [ -f "${TOR_BRIDGE_SERVICE}" ]; then
-      echo "ORPort auto
-ORPort ${SERVER_HOST}:auto
-SocksPort 0
-BridgeRelay 1
+      echo "BridgeRelay 1
+ORPort ${OR_SERVER_PORT}
 ServerTransportPlugin obfs4 exec /usr/bin/obfs4proxy
-ServerTransportListenAddr obfs4 0.0.0.0:8042
-ServerTransportListenAddr obfs4 [::]:8042
-ExtOrPort auto
-Log notice file /var/log/tor/notices.log
-ExitPolicy reject6 *:*, reject *:*
-DisableDebuggerAttachment 0
-ControlPort ${CON_SERVER_PORT}
-CookieAuthentication 1" >>${TOR_TORRC}
+ServerTransportListenAddr obfs4 0.0.0.0:${OBSF_SERVER_PORT}
+ExtORPort auto
+Nickname ${CONTACT_INFO_NAME}
+ContactInfo ${CONTACT_INFO_EMAIL}
+ControlPort ${CON_SERVER_PORT}" >>${TOR_TORRC}
     fi
   }
 
@@ -383,22 +378,16 @@ ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
   function exit-config() {
     if [ -f "${TOR_HIDDEN_SERVICE}" ]; then
       echo "SocksPort 0
-RunAsDaemon 1
 ORPort ${OR_SERVER_PORT}
-ORPort ${SERVER_HOST}:9001
 Nickname ${CONTACT_INFO_NAME}
 ContactInfo ${CONTACT_INFO_EMAIL}
-Log notice file /var/log/tor/notices.log
-DirPort 80
 DirPortFrontPage /etc/tor/tor-exit-notice.html
 ExitPolicy accept *:53        # DNS
 ExitPolicy accept *:80        # HTTP
 ExitPolicy accept *:443       # HTTPS
 ExitPolicy reject *:*
 IPv6Exit 1
-DisableDebuggerAttachment 0
-ControlPort 9051
-CookieAuthentication 1" >>${TOR_TORRC}
+ControlPort 9051" >>${TOR_TORRC}
       curl https://raw.githubusercontent.com/torproject/tor/master/contrib/operator-tools/tor-exit-notice.html --create-dirs -o /etc/tor/tor-exit-notice.html
     fi
   }
