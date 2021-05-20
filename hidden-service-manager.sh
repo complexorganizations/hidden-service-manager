@@ -192,7 +192,6 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
 
   function install-unbound() {
     if [ ! -x "$(command -v unbound)" ]; then
-      if { [ -f "${TOR_HIDDEN_SERVICE}" ] || [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
         if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ]; }; then
           apt-get update
           apt-get install unbound -y
@@ -205,7 +204,6 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
         elif [ "${DISTRO}" == "alpine" ]; then
           apk update
           apk add unbound
-        fi
       fi
     fi
   }
@@ -237,12 +235,6 @@ ControlPort ${CON_SERVER_PORT}" >>${TOR_TORRC}
 
   function relay-config() {
     if [ -f "${TOR_RELAY_SERVICE}" ]; then
-      chattr -i /etc/resolv.conf
-      sed -i "s|nameserver|#nameserver|" /etc/resolv.conf
-      sed -i "s|search|#search|" /etc/resolv.conf
-      echo "nameserver 127.0.0.1" >>/etc/resolv.conf
-      chattr +i /etc/resolv.conf
-      # torrc file
       echo "Nickname ${CONTACT_INFO_NAME}
 ORPort ${OR_SERVER_PORT}
 ExitRelay 0
@@ -279,6 +271,14 @@ ControlPort 9051" >>${TOR_TORRC}
   }
 
   exit-config
+  
+  function unbound-config() {
+      chattr -i /etc/resolv.conf
+      sed -i "s|nameserver|#nameserver|" /etc/resolv.conf
+      sed -i "s|search|#search|" /etc/resolv.conf
+      echo "nameserver 127.0.0.1" >>/etc/resolv.conf
+      chattr +i /etc/resolv.conf
+  }
 
   function restart-service() {
     if pgrep systemd-journal; then
