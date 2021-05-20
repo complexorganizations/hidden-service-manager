@@ -299,8 +299,6 @@ ORPort ${OR_SERVER_PORT}
 Nickname ${CONTACT_INFO_NAME}
 ContactInfo ${CONTACT_INFO_EMAIL}
 DirPortFrontPage /etc/tor/tor-exit-notice.html
-ExitPolicy accept *:53        # DNS
-ExitPolicy accept *:80        # HTTP
 ExitPolicy accept *:443       # HTTPS
 ExitPolicy reject *:*
 IPv6Exit 1
