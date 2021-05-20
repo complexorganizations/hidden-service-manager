@@ -156,6 +156,7 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
         OR_SERVER_PORT="9001"
         DIR_SERVER_PORT="9030"
         CON_SERVER_PORT="9051"
+        OBSF_SERVER_PORT="8042"
         ;;
       2)
         read -rp "Custom OR Port" -e -i "9001" OR_SERVER_PORT
