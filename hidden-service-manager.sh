@@ -59,7 +59,7 @@ TOR_BRIDGE_SERVICE="${TOR_PATH}/bridge-service"
 TOR_EXIT_SERVICE="${TOR_PATH}/exit-service"
 TOR_TORRC_BACKUP="/var/backups/hidden-service-manager.zip"
 HIDDEN_SERVICE_MANAGER_UPDATE="https://raw.githubusercontent.com/complexorganizations/hidden-service-manager/main/hidden-service-manager.sh"
-CONTACT_INFO_NAME="$(openssl rand -hex 10)"
+CONTACT_INFO_NAME="$(openssl rand -hex 9)"
 CONTACT_INFO_EMAIL="$(openssl rand -hex 25)"
 
 if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
@@ -206,6 +206,7 @@ ServerTransportListenAddr obfs4 0.0.0.0:${OBSF_SERVER_PORT}
 ExtORPort auto
 Nickname ${CONTACT_INFO_NAME}
 ContactInfo ${CONTACT_INFO_EMAIL}
+CookieAuthentication 1
 ControlPort ${CON_SERVER_PORT}" >>${TOR_TORRC}
     fi
   }
@@ -220,6 +221,7 @@ ExitRelay 0
 SocksPort 0
 ControlSocket 0
 ControlPort ${CON_SERVER_PORT}
+CookieAuthentication 1
 ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
       # enable and restart service
       if pgrep systemd-journal; then
@@ -244,7 +246,8 @@ DirPortFrontPage /etc/tor/tor-exit-notice.html
 ExitPolicy accept *:443       # HTTPS
 ExitPolicy reject *:*
 IPv6Exit 1
-ControlPort 9051" >>${TOR_TORRC}
+ControlPort ${CON_SERVER_PORT}
+CookieAuthentication 1" >>${TOR_TORRC}
       curl https://raw.githubusercontent.com/torproject/tor/master/contrib/operator-tools/tor-exit-notice.html --create-dirs -o /etc/tor/tor-exit-notice.html
     fi
   }
