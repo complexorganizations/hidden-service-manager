@@ -7,14 +7,11 @@
 ---
 ### Q&A
 
-Why is this created?
-- Cause too many people try and create a tor service, and make a mistake
+What is the purpose of this?
+- Since far too many people attempt to establish a Tor service and fail.
 
-Does this harden the server and the web server?
-- Yes, It will harden the web server, and than install firewall for the normal server
-
-Can i use this to create a Relay, Bridge, Exit Node, or Hidden Service?
-- Yes, you can use this to create & manage all of those things and more
+Is it possible to make a Relay, Bridge, Exit Node, or Hidden Service with this?
+- Yes, you can use it to make and handle all of those activities, as well as a lot more.
 
 ---
 ### Author
