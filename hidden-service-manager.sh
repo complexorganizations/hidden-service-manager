@@ -223,14 +223,6 @@ ControlSocket 0
 ControlPort ${CON_SERVER_PORT}
 CookieAuthentication 1
 ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
-      # enable and restart service
-      if pgrep systemd-journal; then
-        systemctl enable unbound
-        systemctl restart unbound
-      else
-        service unbound enable
-        service unbound restart
-      fi
     fi
   }
 
@@ -267,28 +259,28 @@ CookieAuthentication 1" >>${TOR_TORRC}
       # Tor
       systemctl enable tor
       systemctl restart tor
-      # Nginx
-      systemctl enable nginx
-      systemctl restart nginx
       # NTP
       systemctl enable ntp
       systemctl restart ntp
       # fail2ban
       systemctl enable fail2ban
       systemctl restart fail2ban
+      # Unbound
+        systemctl enable unbound
+        systemctl restart unbound
     else
       # Tor
       service tor enable
       service tor restart
-      # Nginx
-      service nginx enable
-      service nginx restart
       # NTP
       service ntp enable
       service ntp restart
       # Fail2ban
       service fail2ban enable
       service fail2ban restart
+      # Unbound
+        service unbound enable
+        service unbound restart
     fi
   }
 
