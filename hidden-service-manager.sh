@@ -160,6 +160,7 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
       2)
         read -rp "Custom OR Port" -e -i "9001" OR_SERVER_PORT
         read -rp "Custom CON Port" -e -i "9051" CON_SERVER_PORT
+        read -rp "Custom OSBF Port" -e -i "8042" OBSF_SERVER_PORT
         ;;
       esac
     fi
