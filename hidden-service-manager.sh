@@ -154,13 +154,11 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
       case ${PORT_CHOICE_SETTINGS} in
       1)
         OR_SERVER_PORT="9001"
-        DIR_SERVER_PORT="9030"
         CON_SERVER_PORT="9051"
         OBSF_SERVER_PORT="8042"
         ;;
       2)
         read -rp "Custom OR Port" -e -i "9001" OR_SERVER_PORT
-        read -rp "Custom DIR Port" -e -i "9030" DIR_SERVER_PORT
         read -rp "Custom CON Port" -e -i "9051" CON_SERVER_PORT
         ;;
       esac
@@ -169,87 +167,6 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
 
   # Set the port number
   set-port
-
-  # Determine host port
-  function test-connectivity-v4() {
-    if { [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
-      echo "How would you like to detect IPV4?"
-      echo "  1) Curl (Recommended)"
-      echo "  2) IP (Advanced)"
-      echo "  3) Custom (Advanced)"
-      until [[ "${SERVER_HOST_V4_SETTINGS}" =~ ^[1-3]$ ]]; do
-        read -rp "ipv4 choice [1-3]: " -e -i 1 SERVER_HOST_V4_SETTINGS
-      done
-      case ${SERVER_HOST_V4_SETTINGS} in
-      1)
-        SERVER_HOST_V4="$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
-        ;;
-      2)
-        SERVER_HOST_V4=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
-        ;;
-      3)
-        read -rp "Custom IPV4: " -e -i "$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')" SERVER_HOST_V4
-        ;;
-      esac
-    fi
-  }
-
-  # Set Port
-  test-connectivity-v4
-
-  # Determine ipv6
-  function test-connectivity-v6() {
-    if { [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
-      echo "How would you like to detect IPV6?"
-      echo "  1) Curl (Recommended)"
-      echo "  2) IP (Advanced)"
-      echo "  3) Custom (Advanced)"
-      until [[ "$SERVER_HOST_V6_SETTINGS" =~ ^[1-3]$ ]]; do
-        read -rp "ipv6 choice [1-3]: " -e -i 1 SERVER_HOST_V6_SETTINGS
-      done
-      case $SERVER_HOST_V6_SETTINGS in
-      1)
-        SERVER_HOST_V6="$(curl -6 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
-        ;;
-      2)
-        SERVER_HOST_V6=$(ip r get to 2001:4860:4860::8888 | perl -ne '/src ([\w:]+)/ && print "$1\n"')
-        ;;
-      3)
-        read -rp "Custom IPV6: " -e -i "$(curl -6 -s 'https://api.ipengine.dev' | jq -r '.network.ip')" SERVER_HOST_V6
-        ;;
-      esac
-    fi
-  }
-
-  # Set Port
-  test-connectivity-v6
-
-  # What ip version would you like to be available on this VPN?
-  function ipvx-select() {
-    if { [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
-      echo "What IPv do you want to use?"
-      echo "  1) IPv4 (Recommended)"
-      echo "  2) IPv6"
-      echo "  3) Custom (Advanced)"
-      until [[ "$SERVER_HOST_SETTINGS" =~ ^[1-3]$ ]]; do
-        read -rp "IP Choice [1-3]: " -e -i 1 SERVER_HOST_SETTINGS
-      done
-      case $SERVER_HOST_SETTINGS in
-      1)
-        SERVER_HOST="${SERVER_HOST_V4}"
-        ;;
-      2)
-        SERVER_HOST="[$SERVER_HOST_V6]"
-        ;;
-      3)
-        read -rp "Custom Domain: " -e -i "$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.hostname')" SERVER_HOST
-        ;;
-      esac
-    fi
-  }
-
-  # IPv4 or IPv6 Selector
-  ipvx-select
 
   # Install Tor
   function install-tor() {
@@ -310,10 +227,9 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
       sed -i "s|# bantime = 1h|bantime = 720h|" ${FAIL_TO_BAN_CONFIG}
       sed -i "s|# enabled = true|enabled = true|" ${FAIL_TO_BAN_CONFIG}
     elif [ -x "$(command -v ufw)" ]; then
-      ufw allow 80/tcp
       ufw allow 22/tcp
-      ufw default reject incoming
-      ufw default reject outgoing
+      ufw default allow incoming
+      ufw default allow outgoing
     fi
   }
 
