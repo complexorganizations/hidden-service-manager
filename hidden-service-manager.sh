@@ -240,7 +240,15 @@ ExitPolicy reject *:*
 IPv6Exit 1
 ControlPort ${CON_SERVER_PORT}
 CookieAuthentication 1" >>${TOR_TORRC}
-      curl https://raw.githubusercontent.com/torproject/tor/master/contrib/operator-tools/tor-exit-notice.html --create-dirs -o /etc/tor/tor-exit-notice.html
+      echo "<!DOCTYPE html>
+<html>
+   <head>
+      <title>Tor Router</title>
+   </head>
+   <body>
+      <h1>This is a tor router</h1>
+   </body>
+</html>" >>/etc/tor/tor-exit-notice.html
     fi
   }
 
