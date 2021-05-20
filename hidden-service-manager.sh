@@ -59,6 +59,8 @@ TOR_BRIDGE_SERVICE="${TOR_PATH}/bridge-service"
 TOR_EXIT_SERVICE="${TOR_PATH}/exit-service"
 TOR_TORRC_BACKUP="/var/backups/hidden-service-manager.zip"
 HIDDEN_SERVICE_MANAGER_UPDATE="https://raw.githubusercontent.com/complexorganizations/hidden-service-manager/main/hidden-service-manager.sh"
+CONTACT_INFO_NAME="John Doe"
+CONTACT_INFO_EMAIL="johndoe@example.com"
 
 if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
 
@@ -115,25 +117,6 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
 
   # ask the user what to install
   what-to-install
-
-  function contact-info() {
-    if { [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
-      echo "What contact info would you like to use?"
-      echo "  1) John Doe (Recommended)"
-      until [[ "${CONTACT_INFO_SETTINGS}" =~ ^[1-1]$ ]]; do
-        read -rp "Contact Info [1-1]: " -e -i 1 CONTACT_INFO_SETTINGS
-      done
-      case ${CONTACT_INFO_SETTINGS} in
-      1)
-        CONTACT_INFO_NAME="John Doe"
-        CONTACT_INFO_EMAIL="johndoe@example.com"
-        ;;
-        # There's no point in providing contact information with a secret utility if you don't have to.
-      esac
-    fi
-  }
-
-  contact-info
 
   # Question 1: Determine host port
   function set-port() {
