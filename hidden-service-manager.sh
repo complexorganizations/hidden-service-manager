@@ -1,6 +1,8 @@
 #!/bin/bash
 # https://github.com/complexorganizations/hidden-service-manager
 
+# https://community.torproject.org/relay/setup/
+
 # Require script to be run as root
 function super-user-check() {
   if [ "${EUID}" -ne 0 ]; then
