@@ -236,19 +236,6 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
 
   configure-firewall
 
-  function hidden-service-config() {
-    if [ -x "$(command -v nginx)" ]; then
-      sed -i "s|listen 80 default_server;|listen 8080 default_server;|" ${NGINX_LOCAL_CONFIG}
-      sed -i "s|listen [::]:80 default_server;|listen [::]:8080 default_server;|" ${NGINX_LOCAL_CONFIG}
-      sed -i "s|# server_tokens off;|server_tokens off;|" ${NGINX_GLOBAL_CONFIG}
-    elif [ -x "$(command -v tor)" ]; then
-      sed -i "s|#HiddenServiceDir /var/lib/tor/hidden_service/|HiddenServiceDir /var/lib/tor/hidden_service/|" ${TOR_TORRC}
-      sed -i "s|#HiddenServicePort 80 127.0.0.1:80|HiddenServicePort 80 127.0.0.1:8080|" ${TOR_TORRC}
-    fi
-  }
-
-  hidden-service-config
-
   function bridge-config() {
     if [ -f "${TOR_BRIDGE_SERVICE}" ]; then
       echo "BridgeRelay 1
