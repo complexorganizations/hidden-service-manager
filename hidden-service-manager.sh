@@ -174,7 +174,7 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
           yun install ntp tor nyx -y
         elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
           pacman -Syu
-          pacman -Syu --noconfirm tor ntp
+          pacman -Syu --noconfirm --needed tor ntp
         elif [ "${DISTRO}" == "alpine" ]; then
           apk update
           apk add tor ntp
