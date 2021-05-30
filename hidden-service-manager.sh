@@ -58,6 +58,8 @@ TOR_RELAY_SERVICE="${TOR_PATH}/relay-service"
 TOR_BRIDGE_SERVICE="${TOR_PATH}/bridge-service"
 TOR_EXIT_SERVICE="${TOR_PATH}/exit-service"
 TOR_TORRC_BACKUP="/var/backups/hidden-service-manager.zip"
+RESOLV_CONFIG="/etc/resolv.conf"
+RESOLV_CONFIG_OLD="${RESOLV_CONFIG}.old"
 HIDDEN_SERVICE_MANAGER_UPDATE="https://raw.githubusercontent.com/complexorganizations/hidden-service-manager/main/hidden-service-manager.sh"
 CONTACT_INFO_NAME="$(openssl rand -hex 9)"
 CONTACT_INFO_EMAIL="$(openssl rand -hex 25)"
@@ -171,31 +173,23 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
 
   function install-unbound() {
     if [ ! -x "$(command -v unbound)" ]; then
-        if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ]; }; then
-          apt-get update
-          apt-get install unbound -y
-        elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ]; }; then
-          yum update
-          yun install unbound -y
-        elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
-          pacman -Syu
-          pacman -Syu --noconfirm --needed unbound
-        elif [ "${DISTRO}" == "alpine" ]; then
-          apk update
-          apk add unbound
+      if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ]; }; then
+        apt-get update
+        apt-get install unbound -y
+      elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ]; }; then
+        yum update
+        yun install unbound -y
+      elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
+        pacman -Syu
+        pacman -Syu --noconfirm --needed unbound
+      elif [ "${DISTRO}" == "alpine" ]; then
+        apk update
+        apk add unbound
       fi
     fi
   }
 
   install-unbound
-
-  function configure-ntp() {
-    if [ -x "$(command -v ntp)" ]; then
-        ntpdate pool.ntp.org
-    fi
-  }
-
-  configure-ntp
 
   function bridge-config() {
     if [ -f "${TOR_BRIDGE_SERVICE}" ]; then
@@ -204,10 +198,10 @@ ORPort ${OR_SERVER_PORT}
 ServerTransportPlugin obfs4 exec /usr/bin/obfs4proxy
 ServerTransportListenAddr obfs4 0.0.0.0:${OBSF_SERVER_PORT}
 ExtORPort auto
-Nickname ${CONTACT_INFO_NAME}
-ContactInfo ${CONTACT_INFO_EMAIL}
 CookieAuthentication 1
-ControlPort ${CON_SERVER_PORT}" >>${TOR_TORRC}
+ControlPort ${CON_SERVER_PORT}
+Nickname ${CONTACT_INFO_NAME}
+ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
     fi
   }
 
@@ -215,13 +209,13 @@ ControlPort ${CON_SERVER_PORT}" >>${TOR_TORRC}
 
   function relay-config() {
     if [ -f "${TOR_RELAY_SERVICE}" ]; then
-      echo "Nickname ${CONTACT_INFO_NAME}
-ORPort ${OR_SERVER_PORT}
+      echo "ORPort ${OR_SERVER_PORT}
 ExitRelay 0
 SocksPort 0
 ControlSocket 0
-ControlPort ${CON_SERVER_PORT}
 CookieAuthentication 1
+ControlPort ${CON_SERVER_PORT}
+Nickname ${CONTACT_INFO_NAME}
 ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
     fi
   }
@@ -232,14 +226,14 @@ ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
     if [ -f "${TOR_HIDDEN_SERVICE}" ]; then
       echo "SocksPort 0
 ORPort ${OR_SERVER_PORT}
-Nickname ${CONTACT_INFO_NAME}
-ContactInfo ${CONTACT_INFO_EMAIL}
 DirPortFrontPage /etc/tor/tor-exit-notice.html
 ExitPolicy accept *:443       # HTTPS
 ExitPolicy reject *:*
 IPv6Exit 1
+CookieAuthentication 1
 ControlPort ${CON_SERVER_PORT}
-CookieAuthentication 1" >>${TOR_TORRC}
+Nickname ${CONTACT_INFO_NAME}
+ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
       echo "<!DOCTYPE html>
 <html>
    <head>
@@ -253,16 +247,21 @@ CookieAuthentication 1" >>${TOR_TORRC}
   }
 
   exit-config
-  
-  function unbound-config() {
-      chattr -i /etc/resolv.conf
-      sed -i "s|nameserver|#nameserver|" /etc/resolv.conf
-      sed -i "s|search|#search|" /etc/resolv.conf
-      echo "nameserver 127.0.0.1" >>/etc/resolv.conf
-      chattr +i /etc/resolv.conf
-  }
 
-  function restart-service() {
+  function configure-service() {
+    if [ -x "$(command -v ntp)" ]; then
+      ntpdate pool.ntp.org
+    fi
+    if [ -f "${RESOLV_CONFIG}" ]; then
+      chattr -i ${RESOLV_CONFIG}
+      mv ${RESOLV_CONFIG} ${RESOLV_CONFIG_OLD}
+      echo "nameserver 127.0.0.1" >>${RESOLV_CONFIG}
+      echo "nameserver ::1" >>${RESOLV_CONFIG}
+      chattr +i ${RESOLV_CONFIG}
+    else
+      echo "nameserver 127.0.0.1" >>${RESOLV_CONFIG}
+      echo "nameserver ::1" >>${RESOLV_CONFIG}
+    fi
     if pgrep systemd-journal; then
       # Tor
       systemctl enable tor
@@ -274,8 +273,8 @@ CookieAuthentication 1" >>${TOR_TORRC}
       systemctl enable fail2ban
       systemctl restart fail2ban
       # Unbound
-        systemctl enable unbound
-        systemctl restart unbound
+      systemctl enable unbound
+      systemctl restart unbound
     else
       # Tor
       service tor enable
@@ -287,12 +286,12 @@ CookieAuthentication 1" >>${TOR_TORRC}
       service fail2ban enable
       service fail2ban restart
       # Unbound
-        service unbound enable
-        service unbound restart
+      service unbound enable
+      service unbound restart
     fi
   }
 
-  restart-service
+  configure-service
 
 else
 
