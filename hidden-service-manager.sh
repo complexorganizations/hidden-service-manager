@@ -238,9 +238,6 @@ Nickname ${CONTACT_INFO_NAME}" >>${TOR_TORRC}
   exit-config
 
   function configure-service() {
-    if [ -x "$(command -v ntp)" ]; then
-      ntpdate pool.ntp.org
-    fi
     if [ -f "${RESOLV_CONFIG}" ]; then
       chattr -i ${RESOLV_CONFIG}
       mv ${RESOLV_CONFIG} ${RESOLV_CONFIG_OLD}
