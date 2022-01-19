@@ -62,7 +62,7 @@ RESOLV_CONFIG="/etc/resolv.conf"
 RESOLV_CONFIG_OLD="${RESOLV_CONFIG}.old"
 HIDDEN_SERVICE_MANAGER_UPDATE="https://raw.githubusercontent.com/complexorganizations/hidden-service-manager/main/hidden-service-manager.sh"
 CONTACT_INFO_NAME="$(openssl rand -hex 9)"
-CONTACT_INFO_EMAIL="$(openssl rand -hex 25)"
+CONTACT_INFO_EMAIL="${CONTACT_INFO_NAME}@$(openssl rand -hex 10).$(openssl rand -hex 2)"
 
 if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
 
@@ -132,12 +132,10 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
       case ${PORT_CHOICE_SETTINGS} in
       1)
         OR_SERVER_PORT="9001"
-        CON_SERVER_PORT="9051"
         OBSF_SERVER_PORT="8042"
         ;;
       2)
         read -rp "Custom OR Port" -e -i "9001" OR_SERVER_PORT
-        read -rp "Custom CON Port" -e -i "9051" CON_SERVER_PORT
         read -rp "Custom OSBF Port" -e -i "8042" OBSF_SERVER_PORT
         ;;
       esac
@@ -153,16 +151,16 @@ if [ ! -f "${HIDDEN_SERVICE_MANAGER}" ]; then
       if { [ -f "${TOR_HIDDEN_SERVICE}" ] || [ -f "${TOR_RELAY_SERVICE}" ] || [ -f "${TOR_BRIDGE_SERVICE}" ] || [ -f "${TOR_EXIT_SERVICE}" ]; }; then
         if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ]; }; then
           apt-get update
-          apt-get install ntpdate tor nyx obfs4proxy -y
+          apt-get install tor nyx obfs4proxy -y
         elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ]; }; then
           yum update
-          yun install ntp tor nyx -y
+          yun install tor nyx -y
         elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
           pacman -Syu
-          pacman -Syu --noconfirm --needed tor ntp
+          pacman -Syu --noconfirm --needed tor
         elif [ "${DISTRO}" == "alpine" ]; then
           apk update
-          apk add tor ntp
+          apk add tor
         fi
       fi
     fi
@@ -198,10 +196,8 @@ ORPort ${OR_SERVER_PORT}
 ServerTransportPlugin obfs4 exec /usr/bin/obfs4proxy
 ServerTransportListenAddr obfs4 0.0.0.0:${OBSF_SERVER_PORT}
 ExtORPort auto
-CookieAuthentication 1
-ControlPort ${CON_SERVER_PORT}
-Nickname ${CONTACT_INFO_NAME}
-ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
+ContactInfo ${CONTACT_INFO_EMAIL}
+Nickname ${CONTACT_INFO_NAME}" >>${TOR_TORRC}
     fi
   }
 
@@ -209,14 +205,11 @@ ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
 
   function relay-config() {
     if [ -f "${TOR_RELAY_SERVICE}" ]; then
-      echo "ORPort ${OR_SERVER_PORT}
+      echo "Nickname ${CONTACT_INFO_NAME}
+ContactInfo ${CONTACT_INFO_EMAIL}
+ORPort ${OR_SERVER_PORT}
 ExitRelay 0
-SocksPort 0
-ControlSocket 0
-CookieAuthentication 1
-ControlPort ${CON_SERVER_PORT}
-Nickname ${CONTACT_INFO_NAME}
-ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
+SocksPort 0" >>${TOR_TORRC}
     fi
   }
 
@@ -224,16 +217,12 @@ ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
 
   function exit-config() {
     if [ -f "${TOR_HIDDEN_SERVICE}" ]; then
-      echo "SocksPort 0
-ORPort ${OR_SERVER_PORT}
-DirPortFrontPage /etc/tor/tor-exit-notice.html
-ExitPolicy accept *:443       # HTTPS
+      echo "DirPortFrontPage /etc/tor/tor-exit-notice.html
+ExitRelay 1
+ExitPolicy accept *:443
 ExitPolicy reject *:*
-IPv6Exit 1
-CookieAuthentication 1
-ControlPort ${CON_SERVER_PORT}
-Nickname ${CONTACT_INFO_NAME}
-ContactInfo ${CONTACT_INFO_EMAIL}" >>${TOR_TORRC}
+ContactInfo ${CONTACT_INFO_EMAIL}
+Nickname ${CONTACT_INFO_NAME}" >>${TOR_TORRC}
       echo "<!DOCTYPE html>
 <html>
    <head>
